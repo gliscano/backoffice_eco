@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Nunito-Bold';
+    src: './../fonts/Nunito-Bold.ttf';
+}
+@font-face {
+    font-family: 'NunitoLight';
+    src: './../fonts/Nunito-Italic.ttf';
+}
+@font-face {
+    font-family: 'NunitoItalic';
+    src: './../fonts/Nunito-Italic.ttf';
+}
+@font-face {
+    font-family: 'Nunito-Regular';
+    src: '../fonts/Nunito-Regular.ttf';
+    font-style: normal;
+    font-weight: 300;
+}
