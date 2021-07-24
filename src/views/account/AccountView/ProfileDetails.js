@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import {
-  Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles
+  Box, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles,
 } from '@material-ui/core';
+import Address from 'src/views/address';
+// import APP_TEXTS from 'src/language/lang_ES';
 
-const useStyles = makeStyles(() => ({
-  root: {}
+const useStyles = makeStyles((theme) => ({
+  root: {},
+  button: {
+    marginRight: theme.spacing(2)
+  },
 }));
 
 const ProfileDetails = ({ className, ...rest }) => {
   const classes = useStyles();
+  const userData = useSelector((state) => state.userData);
   const [values, setValues] = useState({
-    firstName: 'Guillermo',
-    lastName: 'Rojas',
-    email: 'gliscano@insightupservices.com',
-    phone: '541168828705',
-    state: 'Buenos Aires',
-    country: 'Argentina'
+    firstName: (userData.name) || '',
+    lastName: (userData.lastname) || '',
+    email: (userData.email) || '',
   });
 
   const handleChange = (event) => {
@@ -56,6 +60,7 @@ const ProfileDetails = ({ className, ...rest }) => {
                 name="firstName"
                 onChange={handleChange}
                 required
+                disabled
                 value={values.firstName}
                 variant="outlined"
               />
@@ -71,74 +76,31 @@ const ProfileDetails = ({ className, ...rest }) => {
                 name="lastName"
                 onChange={handleChange}
                 required
+                disabled
                 value={values.lastName}
                 variant="outlined"
               />
             </Grid>
             <Grid
               item
-              md={6}
+              md={12}
               xs={12}
             >
               <TextField
                 fullWidth
-                label="Correo eletcrónico"
+                label="Correo electrónico"
                 name="email"
                 onChange={handleChange}
                 required
+                disabled
                 value={values.email}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Número de Teléfono"
-                name="phone"
-                onChange={handleChange}
-                type="number"
-                value={values.phone}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="País"
-                name="country"
-                onChange={handleChange}
-                required
-                value={values.country}
-                variant="outlined"
-              />
-            </Grid>
-            <Grid
-              item
-              md={6}
-              xs={12}
-            >
-              <TextField
-                fullWidth
-                label="Estado"
-                name="state"
-                onChange={handleChange}
-                required
-                value={values.state}
                 variant="outlined"
               />
             </Grid>
           </Grid>
         </CardContent>
-        <Divider />
-        <Box
+        {/* <Divider />
+         <Box
           display="flex"
           justifyContent="flex-end"
           p={2}
@@ -147,10 +109,15 @@ const ProfileDetails = ({ className, ...rest }) => {
             color="primary"
             variant="contained"
           >
-            Guardar
+            {APP_TEXTS.SAVE_CHANGES_BTN}
           </Button>
-        </Box>
+        </Box> */}
       </Card>
+      <Box
+        spacing={0}
+      >
+        <Address />
+      </Box>
     </form>
   );
 };

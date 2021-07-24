@@ -23,6 +23,7 @@ import AlertBar from 'src/components/AlertBar';
 import { useHistory } from 'react-router';
 import APP_TEXTS from 'src/language/lang_ES';
 import FacebookIcon from '@material-ui/icons/Facebook';
+import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 
 const useStyles = makeStyles((theme) => ({
@@ -265,6 +266,13 @@ const StoreEdit = ({ className, ...rest }) => {
                   type="number"
                   value={values.phone}
                   variant="outlined"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <WhatsAppIcon />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid
@@ -304,7 +312,7 @@ const StoreEdit = ({ className, ...rest }) => {
               className={classes.button}
               onClick={handleUpdate}
             >
-              {APP_TEXTS.UPDATE_STORE_BTN}
+              {APP_TEXTS.SAVE_CHANGES_BTN}
             </Button>
           </Box>
         </Card>

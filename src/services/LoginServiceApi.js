@@ -1,28 +1,63 @@
+import APP_UTILS from 'src/config/app.utils';
 import APP_CONFIG from '../config/app.config';
 
 class LoginServiceApi {
   constructor() {
     this.token = null;
-    this.dataServer = null;
     this.error = null;
+    this.userName = null;
+    this.dataServer = null;
   }
 
-  clearCredentials() {
-    this.token = '';
+  processError(response) {
+    const err = APP_UTILS.getError(response);
+
+    this.error = err;
+    return err;
   }
 
-  processError(err) {
-    if (err) {
-      this.error = err;
+  getDataLocalStorage() {
+    let data = localStorage.getItem(APP_CONFIG.COOKIES_ECO);
+    data = (data) ? JSON.parse(data) : null;
+
+    if (data && data.logged && data.refresh) {
+      return data;
     }
+
+    this.clearDataLocalStorage();
+    return false;
   }
 
-  processResult(resp) {
-    if (resp) {
-      this.dataServer = resp;
-    }
+  setDataLocalStorage(data) {
+    localStorage.setItem(APP_CONFIG.COOKIES_ECO, JSON.stringify(data));
+    this.dataServer = data;
+  }
 
-    return resp;
+  clearDataLocalStorage() {
+    localStorage.setItem(APP_CONFIG.COOKIES_ECO, '');
+    this.token = null;
+    this.dataServer = null;
+  }
+
+  processResult(response) {
+    // if login is success, save token
+    if (response && response.data) {
+      const loginData = {
+        userName: this.userName,
+        token: response.data.access,
+        refresh: response.data.refresh,
+        user_id: response.data.user_id,
+        logged: true,
+      };
+
+      this.setDataLocalStorage(loginData);
+      return loginData;
+    }
+    return false;
+  }
+
+  logout() {
+    this.clearDataLocalStorage();
   }
 
   async obtainTokenRequest(credentials) {
@@ -35,6 +70,8 @@ class LoginServiceApi {
       password,
     });
 
+    this.userName = username;
+
     return fetch(requestUrl, {
       method: 'POST',
       headers: { 'Content-type': 'application/json;charset=UTF-8' },
@@ -45,30 +82,30 @@ class LoginServiceApi {
           return Promise.resolve(response);
         }
 
-        return Promise.reject(new Error(response.statusText));
+        return Promise.reject(response);
       })
       .then((response) => response.json())
       .then((resp) => {
-        console.log('>>> Response Fetch');
-        console.log(resp);
-
         const result = this.processResult(resp);
         return result;
       })
       .catch((error) => {
-        this.processError(error);
-        console.log(error);
-        return error;
+        const err = this.processError(error);
+        return err;
       });
   }
 
-  async updateTokenRequest(refresh) {
+  async updateTokenRequest(credentials) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
     requestUrl += APP_CONFIG.API_ENDPOINT_TOKEN_UPDATE;
 
+    const { userName, refresh } = credentials;
     const params = JSON.stringify({
       refresh,
+      username: userName,
     });
+
+    this.userName = userName;
 
     return fetch(requestUrl, {
       method: 'POST',
@@ -80,18 +117,16 @@ class LoginServiceApi {
           return Promise.resolve(response);
         }
 
-        return Promise.reject(new Error(response.statusText));
+        return Promise.reject(response);
       })
       .then((response) => response.json())
       .then((resp) => {
-        console.log(resp);
-
         const result = this.processResult(resp);
         return result;
       })
       .catch((error) => {
-        console.log(error);
-        return error;
+        const err = this.processError(error);
+        return err;
       });
   }
 }

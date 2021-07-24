@@ -1,8 +1,14 @@
+// React
 import React, { useEffect, useState } from 'react';
-import { Link as RouterLink, useHistory } from 'react-router-dom';
+import GoogleLogin from 'react-google-login';
+// Redux and Router
 import { useDispatch } from 'react-redux';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
+import { SET_STORE_DATA, SET_USER_DATA } from 'src/store/action_types';
+// tools
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+// Material IU and Icons
 import {
   Box,
   Button,
@@ -15,16 +21,23 @@ import {
   Avatar,
   Collapse,
   IconButton,
+  InputAdornment,
 } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
-import GoogleLogin from 'react-google-login';
-import Page from 'src/components/Page';
-import { SET_USER_DATA } from 'src/store/action_types';
-import APP_TEXTS from 'src/language/lang_ES';
 import CloseIcon from '@material-ui/icons/Close';
-import LoginServiceApi from '../../services/LoginServiceApi';
-import FacebookIcon from '../../assets/icons/facebook.svg';
-import GoogleColorsIcon from '../../assets/icons/google.svg';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import FacebookIcon from 'src/assets/icons/facebook.svg';
+import GoogleColorsIcon from 'src/assets/icons/google.svg';
+// components
+import Page from 'src/components/Page';
+// Languages
+import APP_TEXTS from 'src/language/lang_ES';
+// Services Api
+import UserServiceApi from 'src/services/UserServiceApi';
+import LoginServiceApi from 'src/services/LoginServiceApi';
+import StoreServiceApi from 'src/services/StoreServiceApi';
+import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,10 +47,11 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: theme.spacing(3),
   },
   mainContainer: {
-    border: 'solid 1px #D1D4D9',
+    // border: 'solid 1px #D1D4D9',
     borderRadius: '5px',
     paddingTop: '15px',
     paddingBottom: '15px',
+    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
   },
   iconGoogle: {
     width: theme.spacing(3),
@@ -50,84 +64,128 @@ const useStyles = makeStyles((theme) => ({
   buttonText: {
     textTransform: 'none',
   },
+  alert: {
+    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
+  },
 }));
 
 const LoginView = () => {
+  // states
   const [initialized, setInitialized] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [stores, setStores] = useState([]);
   const [message, setMessage] = useState({
     content: '',
     type: 'info', // error, warning, info, success
     show: false,
   });
-  const history = useHistory();
-
+  // hooks
   const classes = useStyles();
+  const history = useHistory();
   const dispatch = useDispatch();
+  // communication instances
   const loginServiceApi = new LoginServiceApi();
+  const userServiceApi = new UserServiceApi();
+  const storeServiceApi = new StoreServiceApi();
 
   const goTo = () => {
-    const path = '/app/';
+    const path = (stores) ? APP_CONFIG.ROUTE_HOME : APP_CONFIG.ROUTE_CREATE_STORE;
     history.push(path);
   };
 
-  const setDataLocalStorage = (data) => {
-    localStorage.setItem('cookiesEco', JSON.stringify(data));
-  };
-
-  const processResultLogin = (response) => {
-    // if login is success, save token
-    if (response && response.data) {
-      const loginData = {
-        userName: username,
-        token: response.data.access,
-        refresh: response.data.refresh,
-        logged: true,
-      };
-
-      setMessage({
-        show: true,
-        type: 'success',
-        content: 'Bienvendo',
-      });
-
+  // Set User Info in Redux
+  const setUserDataStore = (data) => {
+    if (data) {
       dispatch({
         type: SET_USER_DATA,
-        payload: loginData
-      });
-
-      setDataLocalStorage(loginData);
-
-      setTimeout(() => {
-        goTo();
-      }, 1000);
-    } else {
-      setMessage({
-        show: true,
-        type: 'error',
-        content: APP_TEXTS.VALIDATE_CREDENTIALS,
+        payload: data
       });
     }
   };
 
-  async function updateToken(token) {
-    loginServiceApi.updateTokenRequest(token)
+  // Set User Info in Redux
+  const setStoreDataRedux = (data) => {
+    if (data) {
+      dispatch({
+        type: SET_STORE_DATA,
+        payload: data
+      });
+    }
+  };
+
+  async function getInfoByUser(userId, token) {
+    return userServiceApi.getInfoByUser(userId, token)
       .then((response) => {
         if (response && response.data) {
+          setUserDataStore(response.data);
+          return response.data;
+        }
+
+        return false;
+      });
+  }
+
+  async function getStoresByUser(token) {
+    return storeServiceApi.getStores(token)
+      .then((response) => {
+        if (response && response.stores) {
+          const defaultStore = response.stores[0];
+          setStores(defaultStore);
+          setStoreDataRedux(defaultStore);
+          return defaultStore;
+        }
+
+        return false;
+      });
+  }
+
+  async function processResultLogin(loginData) {
+    if (loginData && loginData.token) {
+      setUserDataStore(loginData);
+      const infoByUser = getInfoByUser(loginData.user_id, loginData.token);
+      const storesByUser = getStoresByUser(loginData.token);
+      await Promise.all([infoByUser, storesByUser])
+        .then((response) => {
+          const data = response;
+          setInitialized(true);
+          setMessage({
+            show: true,
+            type: 'success',
+            content: `${APP_TEXTS.WELCOME} ${data[0].name} ${data[0].lastname}`,
+          });
+
+          setTimeout(() => {
+            goTo();
+          }, 1000);
+        });
+    } else if (loginData.code && loginData.message) {
+      setMessage({
+        show: true,
+        type: loginData.type,
+        content: loginData.message,
+      });
+    }
+  }
+
+  async function updateToken(credentials) {
+    loginServiceApi.updateTokenRequest(credentials)
+      .then((response) => {
+        if (response && response.token) {
           processResultLogin(response);
         }
+      })
+      .catch(() => {
+        processResultLogin(false);
       });
   }
 
   const getDataLocalStorage = () => {
-    let data = localStorage.getItem('cookiesEco');
-    data = (data) ? JSON.parse(data) : null;
-
-    if (data && data.logged && data.refresh) {
-      updateToken(data.refresh);
-    } else {
-      localStorage.setItem('cookiesEco', '');
+    const dataLocal = loginServiceApi.getDataLocalStorage();
+    // borrar "&& dataLocal.password"
+    if (dataLocal && dataLocal.password) {
+      updateToken(dataLocal);
     }
   };
 
@@ -171,9 +229,12 @@ const LoginView = () => {
 
     loginServiceApi.obtainTokenRequest(credentials)
       .then((response) => {
-        if (response && response.data) {
+        if (response) {
           processResultLogin(response);
         }
+      })
+      .catch((error) => {
+        processResultLogin(error);
       });
   }
 
@@ -220,7 +281,7 @@ const LoginView = () => {
                     gutterBottom
                     variant="body2"
                   >
-                    Inicia sesión y comienza a Gestionar tu tienda
+                    Inicia sesión y comienza a gestionar tu tienda
                   </Typography>
                 </Box>
                 <Grid
@@ -276,7 +337,7 @@ const LoginView = () => {
                     color="textSecondary"
                     variant="body1"
                   >
-                    o Inicia con tu cuenta de correo registrada
+                    o tu cuenta de correo registrada
                   </Typography>
                 </Box>
                 <TextField
@@ -299,13 +360,26 @@ const LoginView = () => {
                   margin="normal"
                   name="password"
                   onChange={(event) => setPassword(event.currentTarget.value)}
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   variant="outlined"
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
                 />
                 <Box>
                   <Collapse in={message.show}>
                     <Alert
+                      className={classes.alert}
                       severity={message.type}
                       action={(
                         <IconButton
@@ -332,7 +406,7 @@ const LoginView = () => {
                     variant="contained"
                     onClick={handleLogIn}
                   >
-                    Iniciar Sesión
+                    {APP_TEXTS.LOGIN_BTN}
                   </Button>
                 </Box>
                 <Typography
@@ -341,10 +415,10 @@ const LoginView = () => {
                 >
                   <Link
                     component={RouterLink}
-                    to="/register"
+                    to={APP_CONFIG.ROUTE_RESET_PASSWORD}
                     variant="h6"
                   >
-                    Olvide mi contraseña
+                    {APP_TEXTS.FORGOT_PASSWORD_BTN}
                   </Link>
                 </Typography>
                 <Typography
@@ -358,7 +432,7 @@ const LoginView = () => {
                     to="/register"
                     variant="h6"
                   >
-                    Regístrate
+                    {APP_TEXTS.REGISTER_BTN}
                   </Link>
                 </Typography>
               </form>

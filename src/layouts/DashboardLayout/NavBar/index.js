@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
   Link as RouterLink,
@@ -12,9 +13,12 @@ import {
   Hidden,
   List,
   Typography,
-  makeStyles
+  makeStyles,
+  Button,
+  SvgIcon
 } from '@material-ui/core';
-import { useSelector } from 'react-redux';
+import { CLEAR_USER_DATA } from 'src/store/action_types';
+import LoginServiceApi from 'src/services/LoginServiceApi';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import StoreMallDirectoryRoundedIcon from '@material-ui/icons/StoreMallDirectoryRounded';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
@@ -22,6 +26,8 @@ import ContactsIcon from '@material-ui/icons/Contacts';
 import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import SettingsIcon from '@material-ui/icons/Settings';
+import InputIcon from '@material-ui/icons/Input';
+import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import NavItem from './NavItem';
 
 const items = [
@@ -29,11 +35,6 @@ const items = [
     href: '/app/dashboard',
     icon: TableChartIcon,
     title: 'Dashboard'
-  },
-  {
-    href: '/app/store',
-    icon: StoreMallDirectoryRoundedIcon,
-    title: 'Tienda'
   },
   {
     href: '/app/orders',
@@ -51,9 +52,19 @@ const items = [
     title: 'Productos'
   },
   {
+    href: '/app/category',
+    icon: PlaylistAddIcon,
+    title: 'Categoría'
+  },
+  {
+    href: '/app/store',
+    icon: StoreMallDirectoryRoundedIcon,
+    title: 'Tienda'
+  },
+  {
     href: '/app/account',
     icon: AssignmentIndIcon,
-    title: 'Cuenta Personal'
+    title: 'Mis Datos'
   },
   {
     href: '/app/settings',
@@ -62,7 +73,7 @@ const items = [
   }
 ];
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   mobileDrawer: {
     width: 256
   },
@@ -75,6 +86,10 @@ const useStyles = makeStyles(() => ({
     cursor: 'pointer',
     width: 64,
     height: 64
+  },
+  boxItems: {
+    paddingTop: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
   }
 }));
 
@@ -82,11 +97,21 @@ const NavBar = ({ onMobileClose, openMobile }) => {
   const classes = useStyles();
   const location = useLocation();
   const storeData = useSelector((state) => state.storeData);
+  const dispatch = useDispatch();
+  const loginServiceApi = new LoginServiceApi();
   const store = {
     key: 'defaultImage',
     avatar: storeData.urlImageLogo || storeData.defaultLogo,
     name: storeData.name || '',
     slogan: storeData.slogan || '',
+  };
+
+  const logout = () => {
+    loginServiceApi.logout();
+    dispatch({
+      type: CLEAR_USER_DATA,
+      payload: '',
+    });
   };
 
   useEffect(() => {
@@ -129,7 +154,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         </Typography>
       </Box>
       <Divider />
-      <Box p={2}>
+      <Box className={classes.boxItems}>
         <List>
           {items.map((item) => (
             <NavItem
@@ -142,6 +167,16 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         </List>
       </Box>
       <Box flexGrow={1} />
+      <Divider />
+      <Box className={classes.boxItems}>
+        <Button
+          fullWidth
+          onClick={logout}
+          startIcon={<SvgIcon component={InputIcon} />}
+        >
+          Cerrar Sesión
+        </Button>
+      </Box>
     </Box>
   );
 

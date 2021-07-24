@@ -1,26 +1,33 @@
+// React
 import React, { useState } from 'react';
+// Redux and Router
+import { useSelector } from 'react-redux';
 import {
   Redirect,
   Route,
   Switch,
   useRouteMatch
 } from 'react-router';
+// Material IU
 import { makeStyles } from '@material-ui/core';
+// Views
 import AccountView from 'src/views/account/AccountView';
+import AddProduct from 'src/views/product/AddProduct';
+import Address from 'src/views/address';
 import Category from 'src/views/category';
 import CustomerListView from 'src/views/customer/CustomerListView';
-import StoreView from 'src/views/store/StoreView';
+import DashboardView from 'src/views/reports/DashboardView';
+import EditProduct from 'src/views/product/EditProduct';
+import LastOrders from 'src/views/order/';
+import NotFoundView from 'src/views/errors/NotFoundView';
+import ProductListView from 'src/views/product/ProductListView';
+import SettingsView from 'src/views/settings/SettingsView';
 import StoreCreate from 'src/views/store/StoreCreate';
 import StoreEdit from 'src/views/store/StoreEdit';
-import DashboardView from 'src/views/reports/DashboardView';
-import ProductListView from 'src/views/product/ProductListView';
-import LastOrders from 'src/views/order/';
-import AddProduct from 'src/views/product/AddProduct';
-import SettingsView from 'src/views/settings/SettingsView';
-import NotFoundView from 'src/views/errors/NotFoundView';
-import { useSelector } from 'react-redux';
+import StoreView from 'src/views/store/StoreView';
+// components
 import NavBar from './NavBar';
-import TopBar from './TopBar';
+import TopBar from '../../components/TopBarHome';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,6 +78,7 @@ const DashboardLayout = () => {
             <Switch>
               <Route exact path={`${path}`} component={DashboardView} />
               <Route exact path={`${path}/account`} component={AccountView} />
+              <Route exact path={`${path}/address`} component={Address} />
               <Route exact path={`${path}/category`} component={Category} />
               <Route exact path={`${path}/customers`} component={CustomerListView} />
               <Route exact path={`${path}/createStore`} component={StoreCreate} />
@@ -81,6 +89,7 @@ const DashboardLayout = () => {
               <Route exact path={`${path}/orders`} component={LastOrders} />
               <Route exact path={`${path}/products`} component={ProductListView} />
               <Route exact path={`${path}/products/add`} component={AddProduct} />
+              <Route exact path={`${path}/products/edit`} component={EditProduct} />
               <Route exact path={`${path}/*`} component={NotFoundView} />
             </Switch>
           </div>

@@ -1,10 +1,14 @@
 import APP_UTILS from 'src/config/app.utils';
 import APP_CONFIG from '../config/app.config';
 
-class ProductServiceApi {
+class CategoryServiceApi {
   constructor() {
     this.dataServer = null;
     this.error = null;
+  }
+
+  clearCredentiales() {
+    this.token = '';
   }
 
   processError(response) {
@@ -24,31 +28,14 @@ class ProductServiceApi {
     return resp;
   }
 
-  /* CREATE NEW PRODUCT AND UPDATE PRODUCT */
-  async createUpdateProduct(params) {
-    if (!params) {
-      return false;
-    }
-
+  /* CREATE NEW CATEGORY AND UPDATE CATEGORY */
+  async createUpdateCategory(params, update) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_PRODUCT;
-    if (params.update) {
-      requestUrl += `${params.product_id}`;
-    }
-
-    const categ = params.subcategoryId || params.categoryId;
-    const categoryId = [categ];
+    requestUrl += APP_CONFIG.API_ENDPOINT_CATEGORY;
 
     const data = JSON.stringify({
-      category_id: categoryId,
-      code: params.code,
-      description: params.description,
-      price: params.price,
-      status: params.status || 'active',
-      stock: params.stock,
-      store_id: params.storeId,
-      title: params.title,
-      url_photos: params.photos,
+      name: params.name,
+      parent_category_id: params.parent_category_id || null,
     });
 
     let headers = {};
@@ -57,11 +44,47 @@ class ProductServiceApi {
       Authorization: `JWT ${params.token}`,
     });
 
-    const method = (params.update) ? 'PUT' : 'POST';
+    const method = (update) ? 'PUT' : 'POST';
 
     return fetch(requestUrl, {
       method,
       body: data,
+      headers,
+    })
+      .then((response) => {
+        if (response.status >= 200 && response.status < 300) {
+          return Promise.resolve(response);
+        }
+
+        return Promise.reject(response);
+      })
+      .then((response) => response.json())
+      .then((resp) => {
+        const result = this.processResult(resp);
+        return result;
+      })
+      .catch((error) => {
+        this.processError(error);
+        console.log(error);
+      });
+  }
+
+  /* GET CATEGORIES */
+  async getCategories(token, categoryId) {
+    let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
+    requestUrl += APP_CONFIG.API_ENDPOINT_CATEGORY;
+
+    if (categoryId) {
+      requestUrl += `/${categoryId}`;
+    }
+
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${token}`,
+    });
+
+    return fetch(requestUrl, {
+      method: 'GET',
       headers,
     })
       .then((response) => {
@@ -82,66 +105,39 @@ class ProductServiceApi {
       });
   }
 
-  /* GET PRODUCTS */
-  async getProducts(token) {
+  /* DELETE CATEGORY */
+  async deleteCategory(params) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_GET_PRODUCTS;
+    requestUrl += APP_CONFIG.API_ENDPOINT_CATEGORY;
+    requestUrl += params.category_id;
+
+    /* const data = JSON.stringify({
+      name: params.name,
+      parent_category_id: params.parent_category_id || null,
+    }); */
 
     let headers = {};
     headers = new Headers({
       'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
+      Authorization: `JWT ${params.token}`,
     });
 
+    const method = 'DELETE';
+
     return fetch(requestUrl, {
-      method: 'GET',
+      method,
       headers,
     })
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
-          return Promise.resolve(response);
+          return Promise.resolve(response.ok);
         }
 
-        return Promise.reject(new Error(response.statusText));
+        return Promise.reject(response);
       })
-      .then((response) => response.json())
       .then((resp) => {
         const result = this.processResult(resp);
-        console.log(result);
         return result;
-      })
-      .catch((error) => {
-        const err = this.processError(error);
-        return err;
-      });
-  }
-
-  /* DELETE PRODUCT */
-  async deleteProduct(token, idProduct) {
-    let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_PRODUCT;
-    requestUrl += Number(idProduct);
-
-    let headers = {};
-    headers = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
-    });
-
-    return fetch(requestUrl, {
-      method: 'DELETE',
-      headers,
-    })
-      .then((response) => {
-        if (response.status >= 200 && response.status < 300) {
-          return Promise.resolve(response);
-        }
-
-        return Promise.reject(new Error(response.statusText));
-      })
-      .then((resp) => {
-        const result = this.processResult(resp);
-        return (result && result.ok);
       })
       .catch((error) => {
         const err = this.processError(error);
@@ -150,4 +146,4 @@ class ProductServiceApi {
   }
 }
 
-export default ProductServiceApi;
+export default CategoryServiceApi;

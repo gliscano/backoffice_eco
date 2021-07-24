@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import {
   Avatar, Box, Button, Card, CardActions, CardContent, Divider, Typography, makeStyles
 } from '@material-ui/core';
+import APP_TEXTS from 'src/language/lang_ES';
 
 const user = {
   avatar: '',
@@ -60,7 +61,7 @@ const Profile = ({ className, ...rest }) => {
           fullWidth
           variant="text"
         >
-          Subir Foto de Perfil
+          {APP_TEXTS.LOAD_PROFILE_USER}
         </Button>
       </CardActions>
     </Card>

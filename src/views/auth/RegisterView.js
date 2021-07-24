@@ -1,7 +1,8 @@
+// React
 import React, { useState } from 'react';
+// Router
 import { Link as RouterLink } from 'react-router-dom';
-import * as Yup from 'yup';
-import { Formik } from 'formik';
+// Material IU
 import {
   Box,
   Button,
@@ -13,8 +14,15 @@ import {
   Typography,
   makeStyles
 } from '@material-ui/core';
-import UserServiceApi from 'src/services/UserServiceApi';
+// language
+import APP_TEXTS from 'src/language/lang_ES';
+// tools, validations
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+// components
 import Page from 'src/components/Page';
+// services Api
+import UserServiceApi from 'src/services/UserServiceApi';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,14 +34,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RegisterView = () => {
+  // state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [policy, setPolicy] = useState(false);
+  // hook
   const classes = useStyles(false);
-
+  // communitation instance
   const userServiceApi = new UserServiceApi();
 
   /* const goTo = () => {
@@ -79,12 +89,13 @@ const RegisterView = () => {
             }}
             validationSchema={
               Yup.object().shape({
-                email: Yup.string().email('Ingresa un correo eletrónico válido!').max(255).required('Correo electrónico es requerido'),
-                firstName: Yup.string().max(255).required('Nombre es requerido'),
-                lastName: Yup.string().max(255).required('Apellido es requerido'),
-                userName: Yup.string().max(255).required('Nombre de Usuario requerido'),
-                password: Yup.string().max(255).required('Contraseña es requerida'),
-                policy: Yup.boolean().oneOf([true], 'Requerido')
+                email: Yup.string().email(APP_TEXTS.REQUIRED_MAIL)
+                  .max(255).required(APP_TEXTS.VALIDATE_MAIL),
+                firstName: Yup.string().max(70).required(APP_TEXTS.REQUIRED_NAME),
+                lastName: Yup.string().max(70).required(APP_TEXTS.REQUIRED_LASTNAME),
+                userName: Yup.string().max(255).required(APP_TEXTS.REQUIRED_USERNAME),
+                password: Yup.string().min(8).required(APP_TEXTS.REQUIRED_REGISTER_PASSWORD),
+                policy: Yup.boolean().oneOf([true], APP_TEXTS.REQUIRED_POLICY)
               })
             }
           >

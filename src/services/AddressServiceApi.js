@@ -1,7 +1,7 @@
 import APP_UTILS from 'src/config/app.utils';
 import APP_CONFIG from '../config/app.config';
 
-class ProductServiceApi {
+class AddressServiceApi {
   constructor() {
     this.dataServer = null;
     this.error = null;
@@ -18,37 +18,27 @@ class ProductServiceApi {
   processResult(resp) {
     if (resp) {
       this.dataServer = resp;
-      console.log(this.dataServer);
     }
 
     return resp;
   }
 
-  /* CREATE NEW PRODUCT AND UPDATE PRODUCT */
-  async createUpdateProduct(params) {
-    if (!params) {
-      return false;
-    }
-
+  /* CREATE NEW ADDRESS AND UPDATE ADDRESS */
+  async createUpdateAddress(params) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_PRODUCT;
-    if (params.update) {
-      requestUrl += `${params.product_id}`;
-    }
-
-    const categ = params.subcategoryId || params.categoryId;
-    const categoryId = [categ];
+    requestUrl += APP_CONFIG.API_ENDPOINT_ADDRESS;
+    requestUrl += (params.update && params.addressId) ? params.addressId : '';
 
     const data = JSON.stringify({
-      category_id: categoryId,
-      code: params.code,
-      description: params.description,
-      price: params.price,
-      status: params.status || 'active',
-      stock: params.stock,
-      store_id: params.storeId,
-      title: params.title,
-      url_photos: params.photos,
+      city: params.city,
+      extra_info: params.extraInfo,
+      owner_id: params.ownerId,
+      owner_type: params.typeUser,
+      postal_code: params.postalCode,
+      property_id: params.propertyId,
+      property_type: params.propertyType,
+      state: params.state,
+      street: params.street,
     });
 
     let headers = {};
@@ -69,7 +59,7 @@ class ProductServiceApi {
           return Promise.resolve(response);
         }
 
-        return Promise.reject(response);
+        return Promise.reject(new Error(response.statusText));
       })
       .then((response) => response.json())
       .then((resp) => {
@@ -82,10 +72,10 @@ class ProductServiceApi {
       });
   }
 
-  /* GET PRODUCTS */
-  async getProducts(token) {
+  /* GET STORE AND PERSONAL ADDRESS */
+  async getAddress(token) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_GET_PRODUCTS;
+    requestUrl += APP_CONFIG.API_ENDPOINT_ADDRESS;
 
     let headers = {};
     headers = new Headers({
@@ -107,41 +97,7 @@ class ProductServiceApi {
       .then((response) => response.json())
       .then((resp) => {
         const result = this.processResult(resp);
-        console.log(result);
         return result;
-      })
-      .catch((error) => {
-        const err = this.processError(error);
-        return err;
-      });
-  }
-
-  /* DELETE PRODUCT */
-  async deleteProduct(token, idProduct) {
-    let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
-    requestUrl += APP_CONFIG.API_ENDPOINT_PRODUCT;
-    requestUrl += Number(idProduct);
-
-    let headers = {};
-    headers = new Headers({
-      'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
-    });
-
-    return fetch(requestUrl, {
-      method: 'DELETE',
-      headers,
-    })
-      .then((response) => {
-        if (response.status >= 200 && response.status < 300) {
-          return Promise.resolve(response);
-        }
-
-        return Promise.reject(new Error(response.statusText));
-      })
-      .then((resp) => {
-        const result = this.processResult(resp);
-        return (result && result.ok);
       })
       .catch((error) => {
         const err = this.processError(error);
@@ -150,4 +106,4 @@ class ProductServiceApi {
   }
 }
 
-export default ProductServiceApi;
+export default AddressServiceApi;

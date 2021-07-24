@@ -49,9 +49,6 @@ class UserServiceApi {
       })
       .then((response) => response.json())
       .then((resp) => {
-        console.log('>>> Response Fetch');
-        console.log(resp);
-
         this.processResult(resp);
       })
       .catch((error) => {
@@ -60,18 +57,20 @@ class UserServiceApi {
       });
   }
 
-  async getInfoByUser(data) {
+  async getInfoByUser(userId, token) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
     requestUrl += APP_CONFIG.API_ENDPOINT_GET_USER_BY_ID;
+    requestUrl += userId;
 
-    const params = JSON.stringify({
-      username: data.username,
+    let headers = {};
+    headers = new Headers({
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${token}`,
     });
 
-    await fetch(requestUrl, {
-      method: 'POST',
-      headers: { 'Content-type': 'application/json;charset=UTF-8' },
-      body: params,
+    return fetch(requestUrl, {
+      method: 'GET',
+      headers,
     })
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
@@ -82,10 +81,8 @@ class UserServiceApi {
       })
       .then((response) => response.json())
       .then((resp) => {
-        console.log('>>> Response Fetch');
-        console.log(resp);
-
-        this.processResult(resp);
+        this.dataServer = resp;
+        return resp;
       })
       .catch((error) => {
         console.log('Error');

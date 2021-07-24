@@ -1,31 +1,39 @@
+// React
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
-import {
-  Card,
-  CardContent,
-  Typography,
-  makeStyles,
-  CardHeader,
-  IconButton,
-  CardMedia,
-  Grid,
-  Box,
-  CardActions,
-} from '@material-ui/core';
-import StoreServiceApi from 'src/services/StoreServiceApi';
+// Redux and Router
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
-import ConfirmationDialog from 'src/components/ConfirmationDialog';
-import AlertBar from 'src/components/AlertBar';
-import APP_TEXTS from 'src/language/lang_ES';
 import { SET_STORE_DATA } from 'src/store/action_types';
+// Props and classes
+import PropTypes from 'prop-types';
+import clsx from 'clsx';
+// Material IU and Icon
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  CardMedia,
+  Grid,
+  makeStyles,
+  Typography,
+  // IconButton,
+} from '@material-ui/core';
 import CreateIcon from '@material-ui/icons/Create';
 import AlternateEmailRoundedIcon from '@material-ui/icons/AlternateEmailRounded';
-import PhoneIcon from '@material-ui/icons/Phone';
+import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
-import CheckBoxRoundedIcon from '@material-ui/icons/CheckBoxRounded';
-import CheckBoxOutlineBlankRoundedIcon from '@material-ui/icons/CheckBoxOutlineBlankRounded';
+// Language
+import APP_TEXTS from 'src/language/lang_ES';
+// Services Api
+import StoreServiceApi from 'src/services/StoreServiceApi';
+// Components
+import AlertBar from 'src/components/AlertBar';
+import ConfirmationDialog from 'src/components/ConfirmationDialog';
+// Config
+import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,7 +42,8 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   card: {
-    maxWidth: '100%'
+    maxWidth: '100%',
+    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
   },
   cardHeader: {
     paddingTop: theme.spacing(1),
@@ -43,6 +52,10 @@ const useStyles = makeStyles((theme) => ({
   media: {
     height: 0,
     paddingTop: '56.25%', // 16:9
+    cursor: 'pointer',
+  },
+  actions: {
+    justifyContent: 'space-between',
   },
   description: {
     padding: theme.spacing(1),
@@ -122,7 +135,7 @@ const ProfileStore = ({ className, ...rest }) => {
       });
 
       if (edit) {
-        const path = '/app/editStore';
+        const path = APP_CONFIG.ROUTE_EDIT_STORE;
         goTo(path);
       }
     }
@@ -180,7 +193,7 @@ const ProfileStore = ({ className, ...rest }) => {
           <Grid
             item
             key={item.store_id || item.key}
-            md={4}
+            sm={4}
             xs={12}
           >
             <Card
@@ -189,56 +202,14 @@ const ProfileStore = ({ className, ...rest }) => {
             >
               <CardHeader
                 title={item.name}
-                subheader={item.title}
                 className={classes.cardHeader}
-                action={(
-                  <CardActions>
-                    {item.store_id !== storeData.store_id && (
-                      <IconButton
-                        key="storeInactive"
-                        size="small"
-                        aria-label="tiendaInactiva"
-                        id={item.store_id}
-                        onClick={(e) => handleEdit(e, false)}
-                      >
-                        <CheckBoxOutlineBlankRoundedIcon />
-                      </IconButton>
-                    )}
-                    {item.store_id === storeData.store_id && (
-                      <IconButton
-                        key="storeActived"
-                        size="small"
-                        aria-label="tiendaActiva"
-                        id={item.store_id}
-                      >
-                        <CheckBoxRoundedIcon />
-                      </IconButton>
-                    )}
-                    <IconButton
-                      key="edit"
-                      size="small"
-                      id={item.store_id}
-                      aria-label="Editar"
-                      onClick={(e) => handleEdit(e, true)}
-                    >
-                      <CreateIcon />
-                    </IconButton>
-                    <IconButton
-                      key="delete"
-                      size="small"
-                      aria-label="Borrar"
-                      id={item.store_id}
-                      onClick={(e) => handleDelete(e)}
-                    >
-                      <DeleteRoundedIcon />
-                    </IconButton>
-                  </CardActions>
-                )}
               />
               <CardMedia
                 className={classes.media}
                 image="/static/images/store/yourBanner.jpg"
                 title={storeData.title}
+                id={item.store_id}
+                onClick={(e) => handleEdit(e, true)}
               />
               <CardContent>
                 <Grid
@@ -249,8 +220,9 @@ const ProfileStore = ({ className, ...rest }) => {
                     item
                     md={6}
                     xs={12}
+                    justifyContent="center"
                   >
-                    <PhoneIcon />
+                    <WhatsAppIcon />
                     {' '}
                     {item.phone}
                   </Grid>
@@ -258,6 +230,7 @@ const ProfileStore = ({ className, ...rest }) => {
                     item
                     md={6}
                     xs={12}
+                    justifyContent="center"
                   >
                     <AlternateEmailRoundedIcon />
                     {' '}
@@ -272,6 +245,52 @@ const ProfileStore = ({ className, ...rest }) => {
                   </Typography>
                 </Grid>
               </CardContent>
+              <CardActions className={classes.actions}>
+                { /* {item.store_id !== storeData.store_id && (
+                  <Button
+                    key="storeInactive"
+                    size="small"
+                    aria-label="tiendaInactiva"
+                    id={item.store_id}
+                    onClick={(e) => handleEdit(e, false)}
+                    startIcon={<CheckBoxOutlineBlankRoundedIcon />}
+                  >
+                    Seleccionar
+                  </Button>
+                )}
+                {item.store_id === storeData.store_id && (
+                  <Button
+                    key="storeActived"
+                    size="small"
+                    aria-label="tiendaActiva"
+                    id={item.store_id}
+                  >
+                    <CheckBoxRoundedIcon />
+                  </Button>
+                )} */ }
+                <Button
+                  key="delete"
+                  size="small"
+                  aria-label="Eliminar"
+                  id={item.store_id}
+                  onClick={(e) => handleDelete(e)}
+                  startIcon={<DeleteRoundedIcon />}
+                >
+                  {APP_TEXTS.DELETE_BTN}
+                </Button>
+                <Button
+                  key="edit"
+                  size="small"
+                  id={item.store_id}
+                  variant="outlined"
+                  color="secondary"
+                  aria-label={APP_TEXTS.EDIT_STORE_BTN}
+                  onClick={(e) => handleEdit(e, true)}
+                  startIcon={<CreateIcon />}
+                >
+                  {APP_TEXTS.EDIT_STORE_BTN}
+                </Button>
+              </CardActions>
             </Card>
           </Grid>
         ))}

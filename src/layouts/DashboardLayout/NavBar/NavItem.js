@@ -31,6 +31,8 @@ const useStyles = makeStyles((theme) => ({
     marginRight: 'auto'
   },
   active: {
+    borderRight: '2px solid #455a64',
+    backgroundColor: theme.palette.blueGrey.light,
     color: theme.palette.primary.main,
     '& $title': {
       fontWeight: theme.typography.fontWeightMedium
@@ -74,7 +76,7 @@ const NavItem = ({
 NavItem.propTypes = {
   className: PropTypes.string,
   href: PropTypes.string,
-  icon: PropTypes.element,
+  icon: PropTypes.object,
   title: PropTypes.string
 };
 

@@ -1,4 +1,9 @@
+// React
 import React from 'react';
+// Redux and Router
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router';
+// Material IU and Icons
 import {
   Box,
   Button,
@@ -6,8 +11,10 @@ import {
   Grid,
   makeStyles
 } from '@material-ui/core';
+// Language
+import APP_TEXTS from 'src/language/lang_ES';
+// Componets
 import Page from 'src/components/Page';
-import { useHistory } from 'react-router';
 import ProfileStore from './ProfileStore';
 
 const useStyles = makeStyles((theme) => ({
@@ -23,8 +30,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Store = () => {
+  // hooks
   const classes = useStyles();
   const history = useHistory();
+  const storeData = useSelector((state) => state.storeData);
 
   const goTo = () => {
     const path = '/app/createStore';
@@ -46,8 +55,9 @@ const Store = () => {
             color="primary"
             variant="contained"
             onClick={goTo}
+            disabled={storeData.name !== ''}
           >
-            Crear Tienda
+            {(storeData.name === '') ? APP_TEXTS.CREATE_STORE_BTN : APP_TEXTS.ADD_BRANCH_STORE_BTN}
           </Button>
         </Box>
         <Grid>

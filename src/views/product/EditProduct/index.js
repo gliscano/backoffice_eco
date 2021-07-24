@@ -1,8 +1,9 @@
 // React
 import React, { useEffect, useState } from 'react';
+import PropType from 'prop-types';
 // Redux and Router
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 // Material IU
 import {
   Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles, MenuItem,
@@ -32,7 +33,14 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const AddProduct = () => {
+const EditProduct = () => {
+  // hooks
+  const classes = useStyles();
+  const userData = useSelector((state) => state.userData);
+  const storeData = useSelector((state) => state.storeData);
+  const history = useHistory();
+  const location = useLocation();
+  const { product } = location.state;
   // State
   const [category, setCategory] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -49,12 +57,12 @@ const AddProduct = () => {
   const [photos, setPhotos] = useState('');
   const [initialized, setInitialized] = useState(false);
   const [values, setValues] = useState({
-    code: '',
-    description: '',
-    storeId: '',
-    price: '',
-    stock: '',
-    title: '',
+    code: (product && product.code) || '',
+    description: (product && product.description) || '',
+    storeId: (product && product.storeId) || '',
+    price: (product && product.price) || '',
+    stock: (product && product.stock) || '',
+    title: (product && product.title) || '',
   });
   const [alert, setAlert] = useState({
     open: false,
@@ -62,11 +70,7 @@ const AddProduct = () => {
     severity: 'success',
     callback: null,
   });
-  // hooks
-  const classes = useStyles();
-  const userData = useSelector((state) => state.userData);
-  const storeData = useSelector((state) => state.storeData);
-  const history = useHistory();
+
   // communication instance
   const categoryServiceApi = new CategoryServiceApi();
   const productServiceApi = new ProductServiceApi();
@@ -110,6 +114,28 @@ const AddProduct = () => {
     setSubCategSelected(newSubcateg);
   };
 
+  const preselectCategory = () => {
+    console.log('FALTA QUE LA API ENVIE CATEGORY_ID EN LOS PRODUCTOS');
+
+    /* if (!product && product.category_id) { return; }
+
+    // get category by ID
+    categoryServiceApi.getCategories(userData.token, product.category_id)
+      .then((response) => {
+        if (response && response.data) {
+          setCategory(response.data);
+          const { data } = response;
+          const newCateg = { ...selectedCategory };
+          newCateg.id = data.category_id;
+          newCateg.name = data.name;
+          newCateg.subcategories = data.subcategories;
+
+          setCategorySelected(newCateg);
+          setSubcategories(newCateg.subcategories);
+        }
+      }); */
+  };
+
   // Handle callback of dropZone component
   const handleCallbackPhotos = (metaPhotos) => {
     const urlPhotos = metaPhotos.map((photo) => photo.preview);
@@ -129,40 +155,31 @@ const AddProduct = () => {
     setAlert({
       ...alert,
       open: true,
-      message: (status) ? APP_TEXTS.MESSAGE_CREATE_PRODUCT : APP_TEXTS.CREATE_PRODUCT_ERROR,
+      message: (status) ? APP_TEXTS.MESSAGE_UPDATE_PRODUCT : APP_TEXTS.UPDATE_PRODUCT_ERROR,
       severity: (status) ? 'success' : 'error',
       callback: closeAlert,
     });
   };
 
-  const processResult = (response) => {
-    console.log(response);
+  const processResult = () => {
     const resultStatus = true;
     handleAlertBar(resultStatus);
   };
 
-  // Get list of products from Api
+  // Request list category from Api
   const getCategories = () => {
     categoryServiceApi.getCategories(userData.token)
       .then((response) => {
         if (response && response.data) {
           setCategory(response.data);
-          if (response.data.length === 1) {
-            const data = response.data[0];
-            const { name } = data;
-            const subcateg = data.subcategories;
-            setCategorySelected(name);
-            setSubcategories(subcateg);
-          }
-        } else {
-          setCategory([]);
+          preselectCategory();
         }
       });
 
     return false;
   };
 
-  const addNewProduct = () => {
+  const updateProduct = () => {
     const param = {
       code: values.code,
       description: values.description,
@@ -174,7 +191,7 @@ const AddProduct = () => {
       storeId: storeData.store_id,
       token: userData.token,
       photos,
-      update: false,
+      update: true,
     };
 
     productServiceApi.createUpdateProduct(param)
@@ -204,7 +221,7 @@ const AddProduct = () => {
       >
         <Card>
           <CardHeader
-            title={APP_TEXTS.ADD_PRODUCT_TITLE}
+            title={APP_TEXTS.EDIT_PRODUCT_TITLE}
           />
           <Divider />
           <CardContent>
@@ -338,7 +355,6 @@ const AddProduct = () => {
                     label="Precio"
                     name="price"
                     type="number"
-                    helperText="Moneda USD"
                     required
                     onChange={handleChange}
                     value={values.price}
@@ -354,7 +370,6 @@ const AddProduct = () => {
                   <TextField
                     fullWidth
                     label="Stock"
-                    helperText="Disponibles en Inventario"
                     name="stock"
                     onChange={handleChange}
                     value={values.stock}
@@ -369,7 +384,7 @@ const AddProduct = () => {
                   <TextField
                     fullWidth
                     label="Código/SKU"
-                    name="code"
+                    name="codeProduct"
                     onChange={handleChange}
                     required
                     value={values.code}
@@ -396,9 +411,9 @@ const AddProduct = () => {
               color="primary"
               variant="contained"
               className={classes.buttonActions}
-              onClick={addNewProduct}
+              onClick={updateProduct}
             >
-              {APP_TEXTS.ADD_PRODUCT}
+              {APP_TEXTS.SAVE_CHANGES_BTN}
             </Button>
           </Box>
         </Card>
@@ -417,4 +432,8 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+EditProduct.propType = {
+  product: PropType.object
+};
+
+export default EditProduct;

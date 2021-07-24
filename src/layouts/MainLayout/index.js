@@ -1,10 +1,17 @@
+// React
 import React from 'react';
+// Router
 import { Route, Switch, useRouteMatch } from 'react-router';
+// Material IU
+import { makeStyles } from '@material-ui/core';
+// Constants of Configuration
+import APP_CONFIG from 'src/config/app.config';
+// Views and Components
 import LoginView from 'src/views/auth/LoginView';
 import NotFoundView from 'src/views/errors/NotFoundView';
 import RegisterView from 'src/views/auth/RegisterView';
-import { makeStyles } from '@material-ui/core';
-import TopBar from './TopBar';
+import ResetPassword from 'src/views/auth/ResetPassword';
+import TopBar from '../../components/TopBarMain';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,11 +50,36 @@ const MainLayout = () => {
         <div className={classes.contentContainer}>
           <div className={classes.content}>
             <Switch>
-              <Route exact path={`${path}`} component={LoginView} />
-              <Route exact path={`${path}login`} component={LoginView} />
-              <Route exact path={`${path}register`} component={RegisterView} />
-              <Route exact path={`${path}404`} component={NotFoundView} />
-              <Route exact path={`${path}error`} component={NotFoundView} />
+              <Route
+                exact
+                path={`${path}`}
+                component={LoginView}
+              />
+              <Route
+                exact
+                path={path.concat(APP_CONFIG.ROUTE_LOGIN)}
+                component={LoginView}
+              />
+              <Route
+                exact
+                path={path.concat(APP_CONFIG.ROUTE_REGISTER)}
+                component={RegisterView}
+              />
+              <Route
+                exact
+                path={path.concat(APP_CONFIG.ROUTE_RESET_PASSWORD)}
+                component={ResetPassword}
+              />
+              <Route
+                exact
+                path={`${path}404`}
+                component={NotFoundView}
+              />
+              <Route
+                exact
+                path={`${path}error`}
+                component={NotFoundView}
+              />
             </Switch>
           </div>
         </div>
