@@ -1,7 +1,7 @@
 // React
 import React, { useState } from 'react';
 // Router
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useHistory } from 'react-router-dom';
 // Material IU
 import {
   Box,
@@ -16,234 +16,340 @@ import {
 } from '@material-ui/core';
 // language
 import APP_TEXTS from 'src/language/lang_ES';
-// tools, validations
-import * as Yup from 'yup';
-import { Formik } from 'formik';
 // components
 import Page from 'src/components/Page';
+import AlertBar from 'src/components/AlertBar';
 // services Api
 import UserServiceApi from 'src/services/UserServiceApi';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: theme.palette.background.dark,
+    width: '100%',
     height: '100%',
-    paddingBottom: theme.spacing(1),
-    paddingTop: theme.spacing(1)
-  }
+    position: 'absolute',
+    margin: 'auto',
+    padding: '1% 0',
+    backgroundColor: theme.palette.background.dark,
+  },
 }));
 
 const RegisterView = () => {
   // state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [userName, setUserName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [policy, setPolicy] = useState(false);
+  const [values, setValues] = useState({
+    firstName: '',
+    lastName: '',
+    userName: '',
+    email: '',
+    confirmEmail: '',
+    password: '',
+    policy: false,
+  });
+  const [errors, setErrors] = useState({
+    firstName: '',
+    lastName: '',
+    userName: '',
+    email: '',
+    confirmEmail: '',
+    password: '',
+    policy: '',
+    confirmed: false,
+  });
+  const [alert, setAlert] = useState({
+    open: false,
+    message: '',
+    button: APP_TEXTS.ACCEPT_BTN,
+    severity: '',
+    callback: null,
+  });
   // hook
   const classes = useStyles(false);
+  const history = useHistory();
   // communitation instance
   const userServiceApi = new UserServiceApi();
 
-  /* const goTo = () => {
-    const path = '/home/dashboard';
-    console.log(path);
-    // props.history.push(path);
-  }; */
+  const goTo = () => {
+    const path = '/welcome';
+    history.push(path);
+  };
+
+  const handleError = (name, value) => {
+    setErrors((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const closeAlert = () => {
+    setAlert({
+      ...alert,
+      open: false,
+      message: '',
+      callback: null,
+    });
+  };
+
+  const handleAlertBar = ({ message, typeAlert }) => {
+    setAlert({
+      ...alert,
+      open: true,
+      message,
+      severity: typeAlert,
+      callback: closeAlert,
+    });
+  };
+
+  const handleChange = (event) => {
+    const value = (event.target.name === 'policy') ? !values.policy : event.target.value;
+    setValues({
+      ...values,
+      [event.target.name]: value
+    });
+
+    // clear error
+    handleError(event.target.name, '');
+  };
+
+  const validateData = () => {
+    let confirmedError = false;
+
+    const helperText = {
+      firstName: APP_TEXTS.REQUIRED_NAME,
+      lastName: APP_TEXTS.REQUIRED_LASTNAME,
+      userName: APP_TEXTS.REQUIRED_USERNAME,
+      email: APP_TEXTS.REQUIRED_MAIL,
+      confirmEmail: APP_TEXTS.REQUIRED_MAIL,
+      password: APP_TEXTS.REQUIRED_PASSWORD,
+      policy: APP_TEXTS.REQUIRED_POLICY,
+    };
+
+    Object.entries(values).forEach(([name, value]) => {
+      let text = '';
+      if (value === '') {
+        text = helperText[name];
+        confirmedError = true;
+      } else if (name === 'email' || name === 'confirmEmail') {
+        const expReg = new RegExp(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/);
+        if (!(expReg.test(value))) {
+          confirmedError = true;
+          text = APP_TEXTS.VALIDATE_MAIL;
+        }
+      } else if (name === 'password' && value.length < 8) {
+        confirmedError = true;
+        text = APP_TEXTS.REQUIRED_PASSWORD_LOG;
+      }
+      // set Error
+      handleError(name, text);
+    });
+
+    if (!confirmedError && values.email !== values.confirmEmail) {
+      confirmedError = true;
+      handleError('confirmEmail', APP_TEXTS.EMAIL_NOT_MATCH);
+    }
+
+    return confirmedError;
+  };
+
+  const processResult = (response) => {
+    if (response && response.data && response.data.username) {
+      goTo();
+    } else {
+      const paramsAlert = {
+        message: 'ERROR DE ALGO',
+        typeAlert: 'error'
+      };
+
+      // Show error alert
+      handleAlertBar(paramsAlert);
+    }
+  };
 
   const handleRegister = (event) => {
     event.preventDefault();
+    if (validateData()) { return; }
 
     const params = {
-      name: firstName,
-      lastname: lastName,
-      username: userName,
-      email,
-      password
+      name: values.firstName,
+      lastname: values.lastName,
+      username: values.userName,
+      email: values.email,
+      password: values.password
     };
 
-    userServiceApi.create(params);
+    userServiceApi.create(params)
+      .then((response) => processResult(response));
   };
 
   return (
     <Page
       className={classes.root}
-      title="Registrate"
+      title={APP_TEXTS.SIGN_UP_TITLE}
     >
       <Box
         display="flex"
         flexDirection="column"
-        height="100%"
         justifyContent="center"
       >
         <Container maxWidth="sm">
-          <Formik
-            initialValues={{
-              email,
-              firstName,
-              lastName,
-              userName,
-              password,
-              policy
-            }}
-            validationSchema={
-              Yup.object().shape({
-                email: Yup.string().email(APP_TEXTS.REQUIRED_MAIL)
-                  .max(255).required(APP_TEXTS.VALIDATE_MAIL),
-                firstName: Yup.string().max(70).required(APP_TEXTS.REQUIRED_NAME),
-                lastName: Yup.string().max(70).required(APP_TEXTS.REQUIRED_LASTNAME),
-                userName: Yup.string().max(255).required(APP_TEXTS.REQUIRED_USERNAME),
-                password: Yup.string().min(8).required(APP_TEXTS.REQUIRED_REGISTER_PASSWORD),
-                policy: Yup.boolean().oneOf([true], APP_TEXTS.REQUIRED_POLICY)
-              })
-            }
-          >
-            {({
-              errors,
-              isSubmitting,
-              touched
-            }) => (
-              <form>
-                <Box mb={1}>
-                  <Typography
-                    color="textPrimary"
-                    variant="h2"
-                  >
-                    Registrate
-                  </Typography>
-                  <Typography
-                    color="textSecondary"
-                    gutterBottom
-                    variant="body2"
-                  >
-                    Crea una nueva cuenta y comienza a Gestionar tu Tienda!!!
-                  </Typography>
-                </Box>
-                <TextField
-                  error={Boolean(touched.firstName && errors.firstName)}
-                  helperText={touched.firstName && errors.firstName}
-                  label="Nombre"
-                  margin="none"
-                  name="firstName"
-                  onChange={(event) => setFirstName(event.currentTarget.value)}
-                  value={firstName}
-                  variant="outlined"
-                  style={{ width: '49%', marginRight: '1%', marginBottom: '2%' }}
-                />
-                <TextField
-                  error={Boolean(touched.lastName && errors.lastName)}
-                  helperText={touched.lastName && errors.lastName}
-                  label="Apellido"
-                  margin="none"
-                  name="lastName"
-                  onChange={(event) => setLastName(event.currentTarget.value)}
-                  value={lastName}
-                  variant="outlined"
-                  style={{ width: '50%' }}
-                />
-                <TextField
-                  error={Boolean(touched.lastName && errors.lastName)}
-                  fullWidth
-                  helperText={touched.userName && errors.userName}
-                  label="Nombre de Usuario"
-                  margin="none"
-                  name="userName"
-                  onChange={(event) => setUserName(event.currentTarget.value)}
-                  value={userName}
-                  variant="outlined"
-                  style={{ marginBottom: '2%' }}
-                />
-                <TextField
-                  error={Boolean(touched.email && errors.email)}
-                  fullWidth
-                  helperText={touched.email && errors.email}
-                  label="Correo electrónico"
-                  margin="none"
-                  name="email"
-                  onChange={(event) => setEmail(event.currentTarget.value)}
-                  type="email"
-                  value={email}
-                  variant="outlined"
-                  style={{ marginBottom: '2%' }}
-                />
-                <TextField
-                  error={Boolean(touched.password && errors.password)}
-                  fullWidth
-                  helperText={touched.password && errors.password}
-                  label="Contraseña"
-                  margin="none"
-                  name="password"
-                  onChange={(event) => setPassword(event.currentTarget.value)}
-                  type="password"
-                  value={password}
-                  variant="outlined"
-                  style={{ marginBottom: '1%' }}
-                />
-                <Box
-                  alignItems="center"
-                  display="flex"
-                  ml={-1}
+          <form>
+            <Box mb={1}>
+              <Typography
+                color="textPrimary"
+                variant="h2"
+              >
+                {APP_TEXTS.SIGN_UP_TITLE}
+              </Typography>
+              <Typography
+                color="textSecondary"
+                gutterBottom
+                variant="body2"
+              >
+                {APP_TEXTS.SIGN_UP_SUBTITLE}
+              </Typography>
+            </Box>
+            <TextField
+              error={errors.firstName !== ''}
+              helperText={errors.firstName}
+              label={APP_TEXTS.NAME}
+              margin="none"
+              name="firstName"
+              onChange={handleChange}
+              value={values.firstName}
+              variant="outlined"
+              style={{ width: '49%', marginRight: '1%', marginBottom: '2%' }}
+            />
+            <TextField
+              error={errors.lastName !== ''}
+              helperText={errors.lastName}
+              label={APP_TEXTS.LAST_NAME}
+              margin="none"
+              name="lastName"
+              onChange={handleChange}
+              value={values.lastName}
+              variant="outlined"
+              style={{ width: '50%' }}
+            />
+            <TextField
+              fullWidth
+              error={errors.userName !== ''}
+              helperText={errors.userName}
+              label={APP_TEXTS.USERNAME}
+              margin="none"
+              name="userName"
+              onChange={handleChange}
+              value={values.userName}
+              variant="outlined"
+              style={{ marginBottom: '2%' }}
+            />
+            <TextField
+              fullWidth
+              error={errors.email !== ''}
+              helperText={errors.email}
+              label={APP_TEXTS.MAIL}
+              margin="none"
+              name="email"
+              onChange={handleChange}
+              type="email"
+              value={values.email}
+              variant="outlined"
+              style={{ marginBottom: '2%' }}
+            />
+            <TextField
+              fullWidth
+              error={errors.confirmEmail !== ''}
+              helperText={errors.confirmEmail}
+              label={APP_TEXTS.CONFIRM_EMAIL}
+              margin="none"
+              name="confirmEmail"
+              onChange={handleChange}
+              type="email"
+              value={values.confirmEmail}
+              variant="outlined"
+              style={{ marginBottom: '2%' }}
+            />
+            <TextField
+              fullWidth
+              error={errors.password !== ''}
+              helperText={errors.password}
+              label={APP_TEXTS.PASSWORD}
+              margin="none"
+              name="password"
+              onChange={handleChange}
+              type="password"
+              value={values.password}
+              variant="outlined"
+              style={{ marginBottom: '1%' }}
+            />
+            <Box
+              alignItems="center"
+              display="flex"
+              ml={-1}
+            >
+              <Checkbox
+                checked={values.policy}
+                name="policy"
+                onChange={handleChange}
+              />
+              <Typography
+                color="textSecondary"
+                variant="body1"
+              >
+                {APP_TEXTS.AGREE_TERM}
+                {' '}
+                <Link
+                  color="primary"
+                  component={RouterLink}
+                  to="#"
+                  underline="always"
+                  variant="h6"
                 >
-                  <Checkbox
-                    checked={policy}
-                    name="policy"
-                    onChange={() => setPolicy(!policy)}
-                  />
-                  <Typography
-                    color="textSecondary"
-                    variant="body1"
-                  >
-                    He leído los
-                    {' '}
-                    <Link
-                      color="primary"
-                      component={RouterLink}
-                      to="#"
-                      underline="always"
-                      variant="h6"
-                    >
-                      Términos y Condiciones
-                    </Link>
-                    {Boolean(touched.policy && errors.policy) && (
-                      <FormHelperText error>
-                        {errors.policy}
-                      </FormHelperText>
-                    )}
-                  </Typography>
-                </Box>
-                <Box my={2}>
-                  <Button
-                    color="primary"
-                    disabled={isSubmitting}
-                    fullWidth
-                    size="large"
-                    type="submit"
-                    variant="contained"
-                    onClick={handleRegister}
-                  >
-                    Registrarme
-                  </Button>
-                </Box>
-                <Typography
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  ¿Ya estas registrado?
-                  {' '}
-                  <Link
-                    component={RouterLink}
-                    to="/login"
-                    variant="h6"
-                  >
-                    Inicia Sesión
-                  </Link>
-                </Typography>
-              </form>
-            )}
-          </Formik>
+                  {APP_TEXTS.TERMS_AND_CONDITIONS}
+                </Link>
+                {Boolean(errors.policy) && (
+                  <FormHelperText error>
+                    {errors.policy}
+                  </FormHelperText>
+                )}
+              </Typography>
+            </Box>
+            <Box my={1}>
+              <Button
+                color="primary"
+                fullWidth
+                size="large"
+                type="submit"
+                variant="contained"
+                onClick={handleRegister}
+              >
+                {APP_TEXTS.SIGN_UP_BTN}
+              </Button>
+            </Box>
+            <Typography
+              color="textSecondary"
+              variant="body1"
+            >
+              {APP_TEXTS.ALREADY_REGISTERED}
+              {' '}
+              <Link
+                component={RouterLink}
+                to="/login"
+                variant="h6"
+              >
+                {APP_TEXTS.LOGIN_BTN}
+              </Link>
+            </Typography>
+          </form>
         </Container>
       </Box>
+      {(alert && alert.open)
+      && (
+      <AlertBar
+        open={alert.open}
+        message={alert.message}
+        primaryButton={alert.button}
+        severity={alert.severity}
+        parentCallback={alert.callback}
+      />
+      )}
     </Page>
   );
 };

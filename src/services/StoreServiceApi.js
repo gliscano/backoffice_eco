@@ -1,4 +1,5 @@
 import APP_CONFIG from '../config/app.config';
+import ServiceApi from './ServiceApi';
 
 class StoreServiceApi {
   constructor() {
@@ -6,24 +7,18 @@ class StoreServiceApi {
     this.error = null;
   }
 
-  clearCredentiales() {
-    this.token = '';
-  }
-
   processError(err) {
-    if (err) {
-      this.error = err;
-      console.log(err);
-    }
+    this.error = ServiceApi.processError(err);
+    return this.error;
   }
 
-  processResult(resp) {
-    if (resp) {
-      this.dataServer = resp;
-      console.log(this.dataServer);
+  processResult(response) {
+    this.dataServer = response;
+    if (response && response.status && !response.ok) {
+      this.dataServer = this.processError(response);
     }
 
-    return resp;
+    return this.dataServer;
   }
 
   /* CREATE NEW STORE AND UPDATE STORE */
@@ -111,6 +106,20 @@ class StoreServiceApi {
       });
   }
 
+  async getStoresByUser(paramsReq) {
+    let url = APP_CONFIG.API_ENDPOINT_BASE;
+    url += APP_CONFIG.API_ENDPOINT_GET_STORE_BY_USER;
+    url += paramsReq.user_id;
+
+    const method = 'GET';
+    const params = { token: paramsReq.token };
+
+    let response = ServiceApi.getWithToken({ url, params, method });
+    response = this.processResult(response);
+
+    return response;
+  }
+
   /* DELETE STORE */
   async deleteStore(token, idStore) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
@@ -139,7 +148,6 @@ class StoreServiceApi {
         return (result && result.ok);
       })
       .catch((error) => {
-        console.log('Error');
         console.log(error);
       });
   }

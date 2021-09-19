@@ -1,6 +1,8 @@
+// React
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+// Material UI and Icons
 import {
   Box,
   Button,
@@ -14,6 +16,7 @@ import {
   Typography,
   makeStyles
 } from '@material-ui/core';
+import APP_TEXTS from 'src/language/lang_ES';
 
 const useStyles = makeStyles(({
   root: {},
@@ -33,8 +36,8 @@ const Notifications = ({ className, ...rest }) => {
     >
       <Card>
         <CardHeader
-          subheader="Manage the notifications"
-          title="Notifications"
+          subheader={APP_TEXTS.NOTIFICATIONS_SUBTITLE}
+          title={APP_TEXTS.NOTIFICATIONS_TITLE}
         />
         <Divider />
         <CardContent>

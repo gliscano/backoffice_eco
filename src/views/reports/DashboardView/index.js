@@ -5,14 +5,14 @@ import {
   makeStyles
 } from '@material-ui/core';
 import Page from 'src/components/Page';
-import Budget from './Budget';
-import LatestOrders from './LatestOrders';
-import LatestProducts from './LatestProducts';
-import Sales from './Sales';
-import TasksProgress from './TasksProgress';
-import TotalCustomers from './TotalCustomers';
-import TotalProfit from './TotalProfit';
-import TrafficByDevice from './TrafficByDevice';
+// import Budget from './Budget';
+// import LatestOrders from './LatestOrders';
+// import LatestProducts from './LatestProducts';
+// import Sales from './Sales';
+// import TasksProgress from './TasksProgress';
+// import TotalCustomers from './TotalCustomers';
+// import TotalProfit from './TotalProfit';
+// import TrafficByDevice from './TrafficByDevice';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,7 +43,7 @@ const Dashboard = () => {
             xl={3}
             xs={12}
           >
-            <Budget />
+            {/* <Budget /> */}
           </Grid>
           <Grid
             item
@@ -52,7 +52,7 @@ const Dashboard = () => {
             xl={3}
             xs={12}
           >
-            <TotalCustomers />
+            {/* <TotalCustomers /> */}
           </Grid>
           <Grid
             item
@@ -61,7 +61,7 @@ const Dashboard = () => {
             xl={3}
             xs={12}
           >
-            <TasksProgress />
+            {/* <TasksProgress /> */}
           </Grid>
           <Grid
             item
@@ -70,19 +70,19 @@ const Dashboard = () => {
             xl={3}
             xs={12}
           >
-            <TotalProfit />
+            {/* <TotalProfit /> */}
           </Grid>
           <Grid
             item
             xs={12}
           >
-            <LatestOrders />
+            {/* <LatestOrders /> */}
           </Grid>
           <Grid
             item
             xs={12}
           >
-            <LatestProducts />
+            {/* <LatestProducts /> */}
           </Grid>
           <Grid
             item
@@ -91,7 +91,7 @@ const Dashboard = () => {
             xl={9}
             xs={12}
           >
-            <Sales />
+            {/* <Sales /> */}
           </Grid>
           <Grid
             item
@@ -100,7 +100,7 @@ const Dashboard = () => {
             xl={3}
             xs={12}
           >
-            <TrafficByDevice />
+            {/* <TrafficByDevice /> */}
           </Grid>
         </Grid>
       </Container>

@@ -1,5 +1,6 @@
 import APP_UTILS from 'src/config/app.utils';
 import APP_CONFIG from '../config/app.config';
+import ServiceApi from './ServiceApi';
 
 class LoginServiceApi {
   constructor() {
@@ -46,7 +47,8 @@ class LoginServiceApi {
         userName: this.userName,
         token: response.data.access,
         refresh: response.data.refresh,
-        user_id: response.data.user_id,
+        user_id: response.data.user_id || this.userName,
+        userId: response.data.user_id || this.userName,
         logged: true,
       };
 
@@ -99,13 +101,13 @@ class LoginServiceApi {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
     requestUrl += APP_CONFIG.API_ENDPOINT_TOKEN_UPDATE;
 
-    const { userName, refresh } = credentials;
+    const { userId, refresh } = credentials;
     const params = JSON.stringify({
       refresh,
-      username: userName,
+      username: userId,
     });
 
-    this.userName = userName;
+    this.userName = userId;
 
     return fetch(requestUrl, {
       method: 'POST',
@@ -128,6 +130,37 @@ class LoginServiceApi {
         const err = this.processError(error);
         return err;
       });
+  }
+
+  async forgetPasswordRequest(credentials) {
+    let url = APP_CONFIG.API_ENDPOINT_BASE;
+    url += APP_CONFIG.API_ENDPOINT_FORGOT_PASSWORD;
+    const method = 'POST';
+    const params = {
+      email: credentials.username,
+    };
+
+    this.clearDataLocalStorage();
+    const response = ServiceApi.request({ url, params, method });
+    return response;
+  }
+
+  async verificationEmail(credentials) {
+    let url = APP_CONFIG.API_ENDPOINT_BASE;
+    url += APP_CONFIG.API_ENDPOINT_FORGOT_PASSWORD;
+    const method = 'POST';
+    const params = {
+      username: credentials.username,
+      password: credentials.password,
+      name: credentials.name,
+      lastname: credentials.lastname,
+      emai: credentials.emai,
+      tokenValidation: credentials.tokenValidation,
+    };
+
+    this.clearDataLocalStorage();
+    const response = ServiceApi.request({ url, params, method });
+    return response;
   }
 }
 

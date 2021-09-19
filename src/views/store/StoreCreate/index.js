@@ -1,5 +1,6 @@
 // React
 import React, { useState } from 'react';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 // Redux and Router
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,15 +15,17 @@ import {
   CardHeader,
   Divider,
   Grid,
-  TextField,
-  makeStyles,
+  IconButton,
   InputAdornment,
+  makeStyles,
+  TextField,
+  Tooltip,
   Typography,
 } from '@material-ui/core';
-import clsx from 'clsx';
 import { Autocomplete } from '@material-ui/lab';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import FacebookIcon from '@material-ui/icons/Facebook';
+import HelpIcon from '@material-ui/icons/Help';
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
@@ -32,11 +35,13 @@ import StoreServiceApi from 'src/services/StoreServiceApi';
 import Page from 'src/components/Page';
 import UploadImage from 'src/components/UploadImage';
 import AlertBar from 'src/components/AlertBar';
-import textsTest from './textsTest';
+// variables of configuration
+import APP_CONFIG from 'src/config/app.config';
+import generalCategories from 'src/config/generalCategories';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: theme.spacing(2),
+    margin: theme.spacing(2)
   },
   avatar: {
     height: 80,
@@ -47,12 +52,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const StoreDetails = ({ className, ...rest }) => {
+const StoreCreate = ({ className, ...rest }) => {
+  // hooks
   const classes = useStyles();
   const userData = useSelector((state) => state.userData);
   const dispatch = useDispatch();
-  const storeServiceApi = new StoreServiceApi();
   const history = useHistory();
+  // states
   const [values, setValues] = useState({
     storeName: '',
     slogan: '',
@@ -61,17 +67,24 @@ const StoreDetails = ({ className, ...rest }) => {
     phone: '',
     facebook: '',
     instagram: '',
-    keywords: '',
+    keywords: '#tiendaonline',
+  });
+  const [errors, setErrors] = useState({
+    storeName: '',
+    category: '',
+    phone: '',
   });
   const [alert, setAlert] = useState({
     open: false,
     message: '',
     button: APP_TEXTS.ACCEPT_BTN,
-    severity: 'success',
+    severity: '',
     callback: null,
   });
-
-  const options = textsTest.map((option, index) => {
+  // services api
+  const storeServiceApi = new StoreServiceApi();
+  // constants
+  const options = generalCategories.map((option, index) => {
     const firstLetter = option.name[0].toUpperCase();
     return {
       firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter,
@@ -89,39 +102,59 @@ const StoreDetails = ({ className, ...rest }) => {
     });
   };
 
-  const handleAlertBar = (status) => {
+  const handleAlertBar = ({ message, typeAlert }) => {
     setAlert({
       ...alert,
       open: true,
-      message: (status) ? APP_TEXTS.MESSAGE_CREATE_STORE : APP_TEXTS.CREATE_STORE_ERROR,
-      severity: (status) ? 'success' : 'error',
+      message,
+      severity: typeAlert,
       callback: closeAlert,
     });
   };
 
+  // Return to previous page
   const goBack = () => {
     history.goBack();
   };
 
+  // Go to page
+  const goTo = (path) => {
+    history.push(path);
+  };
+
   const processResult = (response) => {
     const resp = response && response.stores;
+    const storeCreated = (resp && resp.status === 'active') || false;
+    const paramsAlert = {
+      message: (storeCreated) ? APP_TEXTS.MESSAGE_CREATE_STORE : APP_TEXTS.CREATE_STORE_ERROR,
+      typeAlert: (storeCreated) ? 'success' : 'error'
+    };
 
-    if (resp && resp.status === 'active') {
-      handleAlertBar(true);
-
+    if (storeCreated) {
       dispatch({
         type: SET_STORE_DATA,
         payload: resp
       });
 
+      // Show successful alert
+      handleAlertBar(paramsAlert);
+
       setTimeout(() => {
         closeAlert();
-        goBack();
+        goTo(APP_CONFIG.ROUTE_STORE);
       }, 2000);
       return;
     }
 
-    handleAlertBar(false);
+    // Show error alert
+    handleAlertBar(paramsAlert);
+  };
+
+  const handleError = (name, value) => {
+    setErrors((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
   };
 
   const handleChange = (event) => {
@@ -129,6 +162,9 @@ const StoreDetails = ({ className, ...rest }) => {
       ...values,
       [event.target.name]: event.target.value
     });
+
+    // clear error
+    handleError(event.target.name, '');
   };
 
   const updateCategorySelected = (data) => {
@@ -138,28 +174,51 @@ const StoreDetails = ({ className, ...rest }) => {
     });
   };
 
+  const validateData = () => {
+    let confirmedError = false;
+
+    const helperText = {
+      storeName: APP_TEXTS.REQUIRED_NAME_STORE,
+      phone: APP_TEXTS.REQUIRED_PHONE_NUMBER,
+      category: APP_TEXTS.REQUIRED_CATEGORY_STORE,
+    };
+
+    Object.entries(values).forEach(([name, value]) => {
+      let text = helperText[name] || '';
+      if (value === '' && text !== '') {
+        confirmedError = true;
+      } else {
+        text = '';
+      }
+      // set Error
+      handleError(name, text);
+    });
+
+    return confirmedError;
+  };
+
   async function handleCreate(event) {
     event.preventDefault();
 
+    // validate data required
+    if (validateData() || !userData.user_id) {
+      return;
+    }
+
     const dataStore = {
       name: values.storeName,
-      title: values.slogan,
+      title: values.slogan || values.storeName,
       description: values.description,
       phone: values.phone,
-      facebook: values.facebook,
-      instagram: values.instagram,
+      facebook: values.facebook || ' ',
+      instagram: values.instagram || ' ',
       keywords: values.keywords,
       userId: userData.user_id,
       token: userData.token,
     };
 
     storeServiceApi.requestPost(dataStore)
-      .then((response) => {
-        console.log(response);
-        if (response && response.stores) {
-          processResult(response);
-        }
-      });
+      .then((response) => processResult(response));
   }
 
   return (
@@ -174,6 +233,8 @@ const StoreDetails = ({ className, ...rest }) => {
         {...rest}
       >
         <Card
+          lg={8}
+          md={6}
           xs={12}
         >
           <CardHeader title="Tienda" />
@@ -190,20 +251,21 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Nombre de la Marca"
                   name="storeName"
-                  onChange={handleChange}
                   required
+                  label={APP_TEXTS.NAME_STORE}
+                  error={errors.storeName !== ''}
+                  helperText={errors.storeName}
                   value={values.storeName}
+                  onChange={handleChange}
                   variant="outlined"
                   style={{ marginBottom: '3%' }}
                 />
                 <TextField
                   fullWidth
-                  label="Slogan de tu Marca"
                   name="slogan"
+                  label={APP_TEXTS.SLOGAN_STORE}
                   onChange={handleChange}
-                  required
                   value={values.slogan}
                   variant="outlined"
                 />
@@ -227,8 +289,8 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Describe lo increible que es tu tienda"
                   name="description"
+                  label={APP_TEXTS.DESCRIPTION_STORE}
                   required
                   multiline
                   rows={3}
@@ -244,8 +306,10 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <Autocomplete
                   id="grouped-Category"
-                  size="small"
                   name="category"
+                  size="small"
+                  error={errors.category !== ''}
+                  helperText={errors.category}
                   options={
                     options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))
                   }
@@ -262,8 +326,9 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Facebook"
                   name="facebook"
+                  label="Facebook"
+                  helperText="@nombre_plataforma"
                   onChange={handleChange}
                   value={values.facebook}
                   variant="outlined"
@@ -283,8 +348,9 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Instagram"
                   name="instagram"
+                  label="Instagram"
+                  helperText="@nombre_plataforma/"
                   onChange={handleChange}
                   value={values.instagram}
                   variant="outlined"
@@ -304,11 +370,13 @@ const StoreDetails = ({ className, ...rest }) => {
               >
                 <TextField
                   fullWidth
-                  label="Número de Teléfono"
                   name="phone"
-                  onChange={handleChange}
                   type="number"
+                  label={APP_TEXTS.PHONE_STORE}
+                  error={errors.phone !== ''}
+                  helperText={errors.phone}
                   value={values.phone}
+                  onChange={handleChange}
                   variant="outlined"
                   InputProps={{
                     startAdornment: (
@@ -324,15 +392,26 @@ const StoreDetails = ({ className, ...rest }) => {
                 md={6}
                 xs={12}
               >
-                <TextField
-                  fullWidth
-                  label="Palabras Claves SEO"
-                  name="keywords"
-                  onChange={handleChange}
-                  required
-                  value={values.keywords}
-                  variant="outlined"
-                />
+                <Tooltip title={APP_TEXTS.KEYWORD_RESEARCH}>
+                  <TextField
+                    fullWidth
+                    label={APP_TEXTS.KEYWORDS_STORE}
+                    name="keywords"
+                    onChange={handleChange}
+                    required
+                    value={values.keywords}
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton>
+                            <HelpIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Tooltip>
               </Grid>
             </Grid>
           </CardContent>
@@ -367,7 +446,7 @@ const StoreDetails = ({ className, ...rest }) => {
         open={alert.open}
         message={alert.message}
         primaryButton={alert.button}
-        severity={alert.status}
+        severity={alert.severity}
         parentCallback={alert.callback}
       />
       )}
@@ -375,8 +454,8 @@ const StoreDetails = ({ className, ...rest }) => {
   );
 };
 
-StoreDetails.propTypes = {
+StoreCreate.propTypes = {
   className: PropTypes.string
 };
 
-export default StoreDetails;
+export default StoreCreate;

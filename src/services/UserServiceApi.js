@@ -7,20 +7,14 @@ class UserServiceApi {
     this.error = null;
   }
 
-  clearCredentials() {
-    this.token = '';
-  }
-
   processError(err) {
-    if (err) {
-      this.error = err;
-    }
+    this.error = err;
+    return this.error;
   }
 
   processResult(resp) {
-    if (resp) {
-      this.dataServer = resp;
-    }
+    this.dataServer = resp;
+    return this.dataServer;
   }
 
   async create(data) {
@@ -35,25 +29,18 @@ class UserServiceApi {
       password: data.password
     });
 
-    await fetch(requestUrl, {
+    return fetch(requestUrl, {
       method: 'POST',
       headers: { 'Content-type': 'application/json;charset=UTF-8' },
       body: params,
     })
-      .then((response) => {
-        if (response.status >= 200 && response.status < 300) {
-          return Promise.resolve(response);
-        }
-
-        return Promise.reject(new Error(response.statusText));
-      })
       .then((response) => response.json())
       .then((resp) => {
-        this.processResult(resp);
+        return this.processResult(resp);
       })
       .catch((error) => {
-        this.processError(error);
         console.log(error);
+        return this.processError(error);
       });
   }
 

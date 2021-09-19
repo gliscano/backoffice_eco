@@ -14,11 +14,12 @@ const initialState = {
     logged: false,
     name: '',
     ownerId: '',
+    phone: '',
     refresh: '',
     token: '',
     typeUser: '',
+    user_id: '',
     username: '',
-    phone: '',
   },
   storeData: {
     category: '',
@@ -50,7 +51,12 @@ const userReducer = (state = initialState, { type, payload }) => {
       };
     }
     case CLEAR_USER_DATA: {
-      return { ...state, ...initialState };
+      const { storeData } = state;
+      const mergeData = { ...state.userData, ...initialState.userData };
+      return {
+        userData: mergeData,
+        storeData,
+      };
     }
     case SET_STORE_DATA: {
       const { userData } = state;
@@ -64,7 +70,12 @@ const userReducer = (state = initialState, { type, payload }) => {
       return state.storeData;
     }
     case CLEAR_STORE_DATA: {
-      return { ...state.storeData, ...initialState.storeData };
+      const { userData } = state;
+      const data = { ...state.storeData, ...initialState.storeData };
+      return {
+        userData,
+        storeData: data,
+      };
     }
     default:
       return state;

@@ -47,7 +47,7 @@ const AlertBar = ({
     >
       <Snackbar
         open={open}
-        autoHideDuration="3000"
+        autoHideDuration="5000"
         className={classes.snackbar}
         TransitionComponent={Transition}
         onClose={handleResponse}
@@ -55,6 +55,7 @@ const AlertBar = ({
         <Alert
           severity={severity}
           className={classes.alert}
+          variant="filled"
           action={(
             <Button
               variant="outlined"

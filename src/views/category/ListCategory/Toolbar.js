@@ -1,7 +1,7 @@
 // React
 import React from 'react';
 // Router
-import { useHistory } from 'react-router-dom';
+// import { useHistory } from 'react-router-dom';
 // Props
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
@@ -16,7 +16,6 @@ import {
   Typography,
 } from '@material-ui/core';
 import AddBoxIcon from '@material-ui/icons/AddBox';
-import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
 import SearchIcon from '@material-ui/icons/Search';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
@@ -54,19 +53,20 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const Toolbar = ({ className, products, ...rest }) => {
+const Toolbar = ({
+  className,
+  totalCategories,
+  callbackAddCategory,
+}) => {
   const classes = useStyles();
-  const history = useHistory();
+  // const history = useHistory();
 
-  const goTo = (path) => {
-    history.push(path);
-  };
+  // const goTo = (path) => {
+  //   history.push(path);
+  // };
 
   return (
-    <div
-      className={clsx(classes.root, className)}
-      {...rest}
-    >
+    <div className={clsx(classes.root, className)}>
       <Grid
         container
         spacing={1}
@@ -96,19 +96,15 @@ const Toolbar = ({ className, products, ...rest }) => {
           xs={12}
           md={8}
         >
-          <Box
-            className={classes.buttonsGroup}
-          >
-            <Box
-              className={classes.boxPublications}
-            >
+          <Box className={classes.buttonsGroup}>
+            <Box className={classes.boxPublications}>
               <Typography
                 variant="body2"
                 gutterBottom
               >
-                {products}
+                {totalCategories}
                 {' '}
-                {'productos'}
+                {'Categorías'}
               </Typography>
             </Box>
             <Button
@@ -116,21 +112,10 @@ const Toolbar = ({ className, products, ...rest }) => {
               color="primary"
               className={classes.button}
               startIcon={<AddBoxIcon />}
-              onClick={() => goTo('products/add')}
+              onClick={callbackAddCategory}
             >
               <span className={classes.title}>
                 {APP_TEXTS.ADD}
-              </span>
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              className={classes.button}
-              startIcon={<PlaylistAddIcon />}
-              onClick={() => goTo('category')}
-            >
-              <span className={classes.title}>
-                {APP_TEXTS.CATEROGY_BTN}
               </span>
             </Button>
           </Box>
@@ -142,7 +127,8 @@ const Toolbar = ({ className, products, ...rest }) => {
 
 Toolbar.propTypes = {
   className: PropTypes.string,
-  products: PropTypes.number
+  totalCategories: PropTypes.number,
+  callbackAddCategory: PropTypes.func
 };
 
 export default Toolbar;

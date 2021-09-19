@@ -1,5 +1,4 @@
-// Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
-const categoryGlobal = [
+const generalCategories = [
   { id: 'MLA5725', name: 'Accesorios para Vehículos' },
   { id: 'MLA1512', name: 'Agro' },
   { id: 'MLA1403', name: 'Alimentos y Bebidas' },
@@ -34,4 +33,4 @@ const categoryGlobal = [
   { id: 'MLA1953', name: 'Otras categorías' },
 ];
 
-export default categoryGlobal;
+export default generalCategories;

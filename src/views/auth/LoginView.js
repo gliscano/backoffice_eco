@@ -31,6 +31,7 @@ import FacebookIcon from 'src/assets/icons/facebook.svg';
 import GoogleColorsIcon from 'src/assets/icons/google.svg';
 // components
 import Page from 'src/components/Page';
+import MainLoading from 'src/components/MainLoading';
 // Languages
 import APP_TEXTS from 'src/language/lang_ES';
 // Services Api
@@ -41,10 +42,11 @@ import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    width: '100%',
+    height: 'calc(100% - 64px)',
+    position: 'absolute',
+    margin: 'auto',
     backgroundColor: theme.palette.background.dark,
-    height: '100%',
-    paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3),
   },
   mainContainer: {
     // border: 'solid 1px #D1D4D9',
@@ -74,8 +76,8 @@ const LoginView = () => {
   const [initialized, setInitialized] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPreloader, setShowPreloader] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [stores, setStores] = useState([]);
   const [message, setMessage] = useState({
     content: '',
     type: 'info', // error, warning, info, success
@@ -90,13 +92,15 @@ const LoginView = () => {
   const userServiceApi = new UserServiceApi();
   const storeServiceApi = new StoreServiceApi();
 
-  const goTo = () => {
-    const path = (stores) ? APP_CONFIG.ROUTE_HOME : APP_CONFIG.ROUTE_CREATE_STORE;
+  const goTo = (stores) => {
+    const path = (stores && !!stores.store_id)
+      ? APP_CONFIG.ROUTE_HOME : APP_CONFIG.ROUTE_CREATE_STORE;
+
     history.push(path);
   };
 
   // Set User Info in Redux
-  const setUserDataStore = (data) => {
+  const setUserData = (data) => {
     if (data) {
       dispatch({
         type: SET_USER_DATA,
@@ -119,7 +123,7 @@ const LoginView = () => {
     return userServiceApi.getInfoByUser(userId, token)
       .then((response) => {
         if (response && response.data) {
-          setUserDataStore(response.data);
+          setUserData(response.data);
           return response.data;
         }
 
@@ -127,13 +131,15 @@ const LoginView = () => {
       });
   }
 
-  async function getStoresByUser(token) {
-    return storeServiceApi.getStores(token)
+  async function getStoresByUser(userId, token) {
+    const params = {
+      token,
+      user_id: userId
+    };
+    return storeServiceApi.getStoresByUser(params)
       .then((response) => {
         if (response && response.stores) {
           const defaultStore = response.stores[0];
-          setStores(defaultStore);
-          setStoreDataRedux(defaultStore);
           return defaultStore;
         }
 
@@ -143,21 +149,26 @@ const LoginView = () => {
 
   async function processResultLogin(loginData) {
     if (loginData && loginData.token) {
-      setUserDataStore(loginData);
+      setUserData(loginData);
       const infoByUser = getInfoByUser(loginData.user_id, loginData.token);
-      const storesByUser = getStoresByUser(loginData.token);
+      const storesByUser = getStoresByUser(loginData.user_id, loginData.token);
       await Promise.all([infoByUser, storesByUser])
         .then((response) => {
-          const data = response;
+          const dataUser = response[0];
+          const dataStore = response[1];
           setInitialized(true);
+          setStoreDataRedux(dataStore);
+
           setMessage({
             show: true,
             type: 'success',
-            content: `${APP_TEXTS.WELCOME} ${data[0].name} ${data[0].lastname}`,
+            content: `${APP_TEXTS.WELCOME} ${dataUser.name} ${dataUser.lastname}`,
           });
 
+          setShowPreloader(true);
+
           setTimeout(() => {
-            goTo();
+            goTo(dataStore);
           }, 1000);
         });
     } else if (loginData.code && loginData.message) {
@@ -183,8 +194,7 @@ const LoginView = () => {
 
   const getDataLocalStorage = () => {
     const dataLocal = loginServiceApi.getDataLocalStorage();
-    // borrar "&& dataLocal.password"
-    if (dataLocal && dataLocal.password) {
+    if (dataLocal) {
       updateToken(dataLocal);
     }
   };
@@ -243,203 +253,215 @@ const LoginView = () => {
       className={classes.root}
       title="Login"
     >
-      <Box
-        display="flex"
-        flexDirection="column"
-        height="100%"
-        justifyContent="center"
-      >
-        <Container
-          maxWidth="sm"
-          className={classes.mainContainer}
+      {showPreloader && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          height="100%"
+          justifyContent="center"
         >
-          <Formik
-            initialValues={{
-              email: username,
-              password,
-            }}
-            validationSchema={Yup.object().shape({
-              email: Yup.string().email('Ingresa un correo electrónico válido').max(255).required('Correo electrónico es requerido'),
-              password: Yup.string().max(255).required('La contraseña es requerida')
-            })}
+          <MainLoading />
+        </Box>
+      )}
+      {!showPreloader && (
+        <Box
+          display="flex"
+          flexDirection="column"
+          height="100%"
+          justifyContent="center"
+        >
+          <Container
+            maxWidth="sm"
+            className={classes.mainContainer}
           >
-            {({
-              errors,
-              isSubmitting,
-              touched
-            }) => (
-              <form>
-                <Box mb={3}>
-                  <Typography
-                    color="textPrimary"
-                    variant="h2"
-                  >
-                    Iniciar Sesión
-                  </Typography>
-                  <Typography
-                    color="textSecondary"
-                    gutterBottom
-                    variant="body2"
-                  >
-                    Inicia sesión y comienza a gestionar tu tienda
-                  </Typography>
-                </Box>
-                <Grid
-                  container
-                  spacing={3}
-                >
-                  <Grid
-                    item
-                    xs={6}
-                  >
-                    <Button
-                      fullWidth
-                      size="large"
-                      className={classes.buttonText}
-                      startIcon={<Avatar size="small" className={classes.iconFacebook} src={FacebookIcon} />}
+            <Formik
+              initialValues={{
+                email: username,
+                password,
+              }}
+              validationSchema={Yup.object().shape({
+                email: Yup.string().email('Ingresa un correo electrónico válido').max(255).required('Correo electrónico es requerido'),
+                password: Yup.string().max(255).required('La contraseña es requerida')
+              })}
+            >
+              {({
+                errors,
+                isSubmitting,
+                touched
+              }) => (
+                <form>
+                  <Box mb={3}>
+                    <Typography
+                      color="textPrimary"
+                      variant="h2"
                     >
-                      Iniciar con Facebook
-                    </Button>
-                  </Grid>
+                      Iniciar Sesión
+                    </Typography>
+                    <Typography
+                      color="textSecondary"
+                      gutterBottom
+                      variant="body2"
+                    >
+                      Inicia sesión y comienza a gestionar tu tienda
+                    </Typography>
+                  </Box>
                   <Grid
-                    item
-                    xs={6}
+                    container
+                    spacing={2}
                   >
-                    <GoogleLogin
+                    <Grid
+                      item
+                      xs={6}
+                    >
+                      <Button
+                        fullWidth
+                        size="large"
+                        className={classes.buttonText}
+                        startIcon={<Avatar size="small" className={classes.iconFacebook} src={FacebookIcon} />}
+                      >
+                        Iniciar con Facebook
+                      </Button>
+                    </Grid>
+                    <Grid
+                      item
+                      xs={6}
+                    >
+                      <GoogleLogin
+                        fullWidth
+                        size="large"
+                        style={{ backgroundColor: '#000000' }}
+                        clientId="21745975916-p9m28i5u1tva9d46thkrcjd6ihj89sn9.apps.googleusercontent.com"
+                        buttonText="Iniciar con Google"
+                        onSuccess={handleGoogleLogin}
+                        onFailure={handleGoogleLogin}
+                        render={(renderProps) => (
+                          <Button
+                            fullWidth
+                            size="large"
+                            className={classes.buttonText}
+                            startIcon={<Avatar size="small" className={classes.iconGoogle} src={GoogleColorsIcon} />}
+                            onClick={renderProps.onClick}
+                            disabled={renderProps.disabled}
+                          >
+                            Iniciar con Google
+                          </Button>
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Box
+                    mt={1}
+                    mb={1}
+                  >
+                    <Typography
+                      align="center"
+                      color="textSecondary"
+                      variant="body1"
+                    >
+                      o con tu cuenta de correo registrada
+                    </Typography>
+                  </Box>
+                  <TextField
+                    error={Boolean(touched.email && errors.email)}
+                    fullWidth
+                    helperText={touched.email && errors.email}
+                    label="Usuario o Correo electrónico"
+                    margin="normal"
+                    name="email"
+                    onChange={(event) => setUsername(event.currentTarget.value)}
+                    type="email"
+                    value={username}
+                    variant="outlined"
+                  />
+                  <TextField
+                    error={Boolean(touched.password && errors.password)}
+                    fullWidth
+                    helperText={touched.password && errors.password}
+                    label="Contraseña"
+                    margin="normal"
+                    name="password"
+                    onChange={(event) => setPassword(event.currentTarget.value)}
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                  <Box>
+                    <Collapse in={message.show}>
+                      <Alert
+                        className={classes.alert}
+                        severity={message.type}
+                        action={(
+                          <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => { setMessage({ show: false, content: '' }); }}
+                          >
+                            <CloseIcon fontSize="inherit" />
+                          </IconButton>
+                        )}
+                      >
+                        {message.content}
+                      </Alert>
+                    </Collapse>
+                  </Box>
+                  <Box my={2}>
+                    <Button
+                      color="primary"
+                      disabled={isSubmitting}
                       fullWidth
                       size="large"
-                      style={{ backgroundColor: '#000000' }}
-                      clientId="21745975916-p9m28i5u1tva9d46thkrcjd6ihj89sn9.apps.googleusercontent.com"
-                      buttonText="Iniciar con Google"
-                      onSuccess={handleGoogleLogin}
-                      onFailure={handleGoogleLogin}
-                      render={(renderProps) => (
-                        <Button
-                          fullWidth
-                          size="large"
-                          className={classes.buttonText}
-                          startIcon={<Avatar size="small" className={classes.iconGoogle} src={GoogleColorsIcon} />}
-                          onClick={renderProps.onClick}
-                          disabled={renderProps.disabled}
-                        >
-                          Iniciar con Google
-                        </Button>
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-                <Box
-                  mt={3}
-                  mb={1}
-                >
+                      type="submit"
+                      variant="contained"
+                      onClick={handleLogIn}
+                    >
+                      {APP_TEXTS.LOGIN_BTN}
+                    </Button>
+                  </Box>
                   <Typography
-                    align="center"
                     color="textSecondary"
                     variant="body1"
                   >
-                    o tu cuenta de correo registrada
-                  </Typography>
-                </Box>
-                <TextField
-                  error={Boolean(touched.email && errors.email)}
-                  fullWidth
-                  helperText={touched.email && errors.email}
-                  label="Usuario o Correo electrónico"
-                  margin="normal"
-                  name="email"
-                  onChange={(event) => setUsername(event.currentTarget.value)}
-                  type="email"
-                  value={username}
-                  variant="outlined"
-                />
-                <TextField
-                  error={Boolean(touched.password && errors.password)}
-                  fullWidth
-                  helperText={touched.password && errors.password}
-                  label="Contraseña"
-                  margin="normal"
-                  name="password"
-                  onChange={(event) => setPassword(event.currentTarget.value)}
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  variant="outlined"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? <Visibility /> : <VisibilityOff />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-                <Box>
-                  <Collapse in={message.show}>
-                    <Alert
-                      className={classes.alert}
-                      severity={message.type}
-                      action={(
-                        <IconButton
-                          aria-label="close"
-                          color="inherit"
-                          size="small"
-                          onClick={() => { setMessage({ show: false, content: '' }); }}
-                        >
-                          <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                      )}
+                    <Link
+                      component={RouterLink}
+                      to={APP_CONFIG.ROUTE_FORGOT_PASSWORD}
+                      variant="h6"
                     >
-                      {message.content}
-                    </Alert>
-                  </Collapse>
-                </Box>
-                <Box my={2}>
-                  <Button
-                    color="primary"
-                    disabled={isSubmitting}
-                    fullWidth
-                    size="large"
-                    type="submit"
-                    variant="contained"
-                    onClick={handleLogIn}
+                      {APP_TEXTS.FORGOT_PASSWORD_BTN}
+                    </Link>
+                  </Typography>
+                  <Typography
+                    color="textSecondary"
+                    variant="body1"
                   >
-                    {APP_TEXTS.LOGIN_BTN}
-                  </Button>
-                </Box>
-                <Typography
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  <Link
-                    component={RouterLink}
-                    to={APP_CONFIG.ROUTE_RESET_PASSWORD}
-                    variant="h6"
-                  >
-                    {APP_TEXTS.FORGOT_PASSWORD_BTN}
-                  </Link>
-                </Typography>
-                <Typography
-                  color="textSecondary"
-                  variant="body1"
-                >
-                  ¿No tienes cuenta?
-                  {' '}
-                  <Link
-                    component={RouterLink}
-                    to="/register"
-                    variant="h6"
-                  >
-                    {APP_TEXTS.REGISTER_BTN}
-                  </Link>
-                </Typography>
-              </form>
-            )}
-          </Formik>
-        </Container>
-      </Box>
+                    ¿No tienes cuenta?
+                    {' '}
+                    <Link
+                      component={RouterLink}
+                      to="/register"
+                      variant="h6"
+                    >
+                      {APP_TEXTS.REGISTER_BTN}
+                    </Link>
+                  </Typography>
+                </form>
+              )}
+            </Formik>
+          </Container>
+        </Box>
+      )}
     </Page>
   );
 };

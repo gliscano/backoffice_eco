@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 // Redux and Router
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
-import { SET_STORE_DATA } from 'src/store/action_types';
+import { CLEAR_STORE_DATA, SET_STORE_DATA } from 'src/store/action_types';
 // Props and classes
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
@@ -19,10 +19,10 @@ import {
   Grid,
   makeStyles,
   Typography,
-  // IconButton,
+  Link,
 } from '@material-ui/core';
 import CreateIcon from '@material-ui/icons/Create';
-import AlternateEmailRoundedIcon from '@material-ui/icons/AlternateEmailRounded';
+import InstagramIcon from '@material-ui/icons/Instagram';
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
 // Language
@@ -34,6 +34,7 @@ import AlertBar from 'src/components/AlertBar';
 import ConfirmationDialog from 'src/components/ConfirmationDialog';
 // Config
 import APP_CONFIG from 'src/config/app.config';
+import ThemeCustom from 'src/theme';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -64,16 +65,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ProfileStore = ({ className, ...rest }) => {
-  const classes = useStyles();
-  const userData = useSelector((state) => state.userData);
-  const storeData = useSelector((state) => state.storeData);
-  const storeServiceApi = new StoreServiceApi();
+  // state
   const [initialized, setInitialized] = useState(false);
   const [stores, setStores] = useState([]);
   const [currentStoreID, setCurrentStoreID] = useState(null);
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
-  const dispatch = useDispatch();
-  const history = useHistory();
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -81,6 +77,14 @@ const ProfileStore = ({ className, ...rest }) => {
     severity: 'success',
     callback: null,
   });
+  // hooks
+  const classes = useStyles();
+  const userData = useSelector((state) => state.userData);
+  const storeData = useSelector((state) => state.storeData);
+  const dispatch = useDispatch();
+  const history = useHistory();
+  // services intance
+  const storeServiceApi = new StoreServiceApi();
 
   const closeAlert = () => {
     setAlert({
@@ -117,6 +121,15 @@ const ProfileStore = ({ className, ...rest }) => {
     history.push(path);
   };
 
+  const setStoreDataRedux = (store) => {
+    const type = (store) ? SET_STORE_DATA : CLEAR_STORE_DATA;
+    const payload = store || '';
+    dispatch({
+      type,
+      payload
+    });
+  };
+
   const handleEdit = (event, edit) => {
     if (event === 'clickaway') {
       return;
@@ -129,10 +142,7 @@ const ProfileStore = ({ className, ...rest }) => {
 
     store = (store && store.length) ? store[store.length - 1] : null;
     if (store) {
-      dispatch({
-        type: SET_STORE_DATA,
-        payload: store
-      });
+      setStoreDataRedux(store);
 
       if (edit) {
         const path = APP_CONFIG.ROUTE_EDIT_STORE;
@@ -144,11 +154,19 @@ const ProfileStore = ({ className, ...rest }) => {
   const initDataStores = (response) => {
     if (response && response.stores) {
       setStores(response.stores);
+      if (response && response.stores && !response.stores.length) {
+        setStoreDataRedux();
+      }
     }
   };
 
   const getDataStores = () => {
-    storeServiceApi.getStores(userData.token)
+    const params = {
+      token: userData.token,
+      user_id: userData.user_id
+    };
+
+    storeServiceApi.getStoresByUser(params)
       .then((response) => {
         initDataStores(response);
       });
@@ -232,9 +250,16 @@ const ProfileStore = ({ className, ...rest }) => {
                     xs={12}
                     justifyContent="center"
                   >
-                    <AlternateEmailRoundedIcon />
+                    <InstagramIcon />
                     {' '}
-                    {item.instagram}
+                    <Link
+                      href={`https://www.instagram.com/${item.instagram}/`}
+                      color="inherit"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {item.instagram}
+                    </Link>
                   </Grid>
                 </Grid>
                 <Grid
@@ -303,6 +328,7 @@ const ProfileStore = ({ className, ...rest }) => {
         message={APP_TEXTS.CONFIRM_DELETE_STORE}
         primaryButton={APP_TEXTS.DELETE_BTN}
         secondaryButton={APP_TEXTS.CANCEL_BTN}
+        primaryColor={ThemeCustom.palette.red.main}
         parentCallback={deleteCallback}
       />
       )}

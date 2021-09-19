@@ -27,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     margin: theme.spacing(1)
   },
+  button: {
+    marginRight: theme.spacing(1)
+  },
 }));
 
 const Store = () => {
@@ -35,15 +38,15 @@ const Store = () => {
   const history = useHistory();
   const storeData = useSelector((state) => state.storeData);
 
-  const goTo = () => {
-    const path = '/app/createStore';
+  const goTo = (route) => {
+    const path = `/app/${route}`;
     history.push(path);
   };
 
   return (
     <Page
       className={classes.root}
-      title="Tiendas"
+      title={APP_TEXTS.STORE}
     >
       <Container maxWidth="lg">
         <Box
@@ -54,10 +57,19 @@ const Store = () => {
           <Button
             color="primary"
             variant="contained"
-            onClick={goTo}
+            onClick={() => goTo('createStore')}
+            className={classes.button}
             disabled={storeData.name !== ''}
           >
             {(storeData.name === '') ? APP_TEXTS.CREATE_STORE_BTN : APP_TEXTS.ADD_BRANCH_STORE_BTN}
+          </Button>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => goTo('address')}
+            disabled={storeData.name === ''}
+          >
+            {APP_TEXTS.ADD_ADDRESS}
           </Button>
         </Box>
         <Grid>

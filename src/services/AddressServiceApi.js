@@ -1,5 +1,6 @@
 import APP_UTILS from 'src/config/app.utils';
 import APP_CONFIG from '../config/app.config';
+import ServiceApi from './ServiceApi';
 
 class AddressServiceApi {
   constructor() {
@@ -103,6 +104,19 @@ class AddressServiceApi {
         const err = this.processError(error);
         return err;
       });
+  }
+
+  async deleteAddress(data) {
+    let url = APP_CONFIG.API_ENDPOINT_BASE;
+    url += APP_CONFIG.API_ENDPOINT_ADDRESS;
+    const method = 'DELETE';
+    const params = {
+      address_id: data.address_id,
+    };
+
+    let response = ServiceApi.request({ url, params, method });
+    response = this.processResult(response);
+    return response;
   }
 }
 

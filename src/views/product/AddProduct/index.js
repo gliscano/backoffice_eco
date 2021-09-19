@@ -5,8 +5,27 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 // Material IU
 import {
-  Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles, MenuItem,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  ListItemText,
+  makeStyles,
+  MenuItem,
+  Select,
+  Typography,
+  TextField,
 } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 // Components
@@ -15,6 +34,7 @@ import AlertBar from 'src/components/AlertBar';
 // services Api
 import CategoryServiceApi from 'src/services/CategoryServiceApi';
 import ProductServiceApi from 'src/services/ProductServiceApi';
+import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,27 +49,33 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonActions: {
     marginLeft: theme.spacing(1)
+  },
+  categoryList: {
+    borderTop: '1px solid #EDF0F5',
+    borderBottom: '1px solid #EDF0F5',
+  },
+  itemSubcategory: {
+    marginLeft: theme.spacing(2),
   }
 }));
 
 const AddProduct = () => {
   // State
   const [category, setCategory] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [selectedCategory, setCategorySelected] = useState([{
-    name: '',
-    id: '',
-    subcategories: [],
-  }]);
-  const [selectedSubcateg, setSubCategSelected] = useState([{
-    name: '',
-    id: '',
-    subcategories: [],
-  }]);
+  // const [subcategories, setSubcategories] = useState([]);
+  const [selectedCategory, setCategorySelected] = useState([]);
+  const [categoryPreview, setCategoryPreview] = useState({
+    categories: [],
+  });
+  // const [selectedSubcateg, setSubCategSelected] = useState([{
+  //   name: '',
+  //   id: '',
+  //   subcategories: [],
+  // }]);
   const [photos, setPhotos] = useState('');
   const [initialized, setInitialized] = useState(false);
   const [values, setValues] = useState({
-    code: '',
+    codeSKU: '',
     description: '',
     storeId: '',
     price: '',
@@ -71,8 +97,8 @@ const AddProduct = () => {
   const categoryServiceApi = new CategoryServiceApi();
   const productServiceApi = new ProductServiceApi();
 
-  const goToCategory = () => {
-    history.push('/app/category');
+  const goTo = (path) => {
+    history.push(path);
   };
 
   const goBack = () => {
@@ -86,34 +112,46 @@ const AddProduct = () => {
     });
   };
 
-  const changeCategory = (event) => {
-    const data = event.target.value;
+  const changeCategory = (data) => {
     if (!data || !data.category_id) {
       return;
     }
 
-    const newCateg = { ...selectedCategory };
-    newCateg.id = data.category_id;
-    newCateg.name = data.name;
-    newCateg.subcategories = data.subcategories;
+    let newArray = [];
+    let newArrayPreview = [];
+    const preview = [...categoryPreview.categories];
 
-    setCategorySelected(newCateg);
-    setSubcategories(newCateg.subcategories);
+    if (selectedCategory.indexOf(data.category_id) > -1) {
+      newArray = selectedCategory.filter((item) => item !== data.category_id);
+      newArrayPreview = preview.filter((item) => item !== data.name);
+    } else {
+      newArray = [...selectedCategory];
+      newArray.push(data.category_id);
+      newArrayPreview = [...preview];
+      newArrayPreview.push(data.name);
+    }
+
+    setCategorySelected(newArray);
+    setCategoryPreview((prevState) => ({
+      ...prevState,
+      categories: newArrayPreview,
+    }));
   };
 
-  const changeSubcategory = (event) => {
+  /* const changeSubcategory = (event) => {
     const data = event.target.value;
     const newSubcateg = {
       id: data.category_id,
       name: data.name,
     };
     setSubCategSelected(newSubcateg);
-  };
+  }; */
 
   // Handle callback of dropZone component
   const handleCallbackPhotos = (metaPhotos) => {
     const urlPhotos = metaPhotos.map((photo) => photo.preview);
-    setPhotos(urlPhotos[0]);
+    const urlString = (urlPhotos.length > 0) ? urlPhotos.join() : '';
+    setPhotos(urlString);
   };
 
   const closeAlert = () => {
@@ -139,6 +177,10 @@ const AddProduct = () => {
     console.log(response);
     const resultStatus = true;
     handleAlertBar(resultStatus);
+
+    setTimeout(() => {
+      goTo(APP_CONFIG.ROUTE_PRODUCTS);
+    }, 1000);
   };
 
   // Get list of products from Api
@@ -150,9 +192,9 @@ const AddProduct = () => {
           if (response.data.length === 1) {
             const data = response.data[0];
             const { name } = data;
-            const subcateg = data.subcategories;
             setCategorySelected(name);
-            setSubcategories(subcateg);
+            // const subcateg = data.subcategories;
+            // setSubcategories(subcateg);
           }
         } else {
           setCategory([]);
@@ -163,14 +205,14 @@ const AddProduct = () => {
   };
 
   const addNewProduct = () => {
+    const skuRandom = Math.floor(12345 * Math.random());
     const param = {
-      code: values.code,
+      code: values.codeSKU || skuRandom,
       description: values.description,
       price: values.price,
       stock: values.stock,
       title: values.title,
-      categoryId: selectedCategory.id,
-      subcategoryId: selectedSubcateg.id,
+      categoryId: selectedCategory[0],
       storeId: storeData.store_id,
       token: userData.token,
       photos,
@@ -214,55 +256,49 @@ const AddProduct = () => {
             >
               <Grid
                 item
-                md={4}
+                md={8}
                 xs={12}
               >
-                <TextField
-                  fullWidth
-                  select
-                  required
-                  name="category"
-                  label="Categoría"
-                  value={selectedCategory.name}
-                  defaultValue=""
-                  onChange={changeCategory}
-                  variant="outlined"
-                  size="small"
-                >
-                  {category.map((item) => (
-                    <MenuItem
-                      key={item.name}
-                      value={item}
-                    >
-                      {item.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid
-                item
-                md={4}
-                xs={12}
-              >
-                <TextField
-                  fullWidth
-                  select
-                  label="Subcategoría"
-                  name="subcategory"
-                  onChange={changeSubcategory}
-                  value={selectedSubcateg.name}
-                  variant="outlined"
-                  size="small"
-                >
-                  {subcategories.map((itemSub) => (
-                    <MenuItem
-                      key={itemSub.name}
-                      value={itemSub}
-                    >
-                      {itemSub.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <FormControl variant="outlined" fullWidth size="small">
+                  <InputLabel id={APP_TEXTS.CATEGORY_LABEL}>{APP_TEXTS.CATEGORY_LABEL}</InputLabel>
+                  <Select
+                    required
+                    name="category"
+                    label={APP_TEXTS.CATEGORY_LABEL}
+                    labelId={APP_TEXTS.CATEGORY_LABEL}
+                    value={categoryPreview.categories}
+                    renderValue={(selected) => selected.join(', ')}
+                  >
+                    {category.map((item) => (
+                      <>
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1"
+                          >
+                            <Typography>{item.name}</Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            {item.subcategories.map((itemSub) => (
+                              <MenuItem
+                                key={itemSub.category_id}
+                                className={classes.itemSubcategory}
+                                onClick={() => changeCategory(itemSub)}
+                              >
+                                <Checkbox
+                                  id={itemSub.category_id}
+                                  checked={selectedCategory.indexOf(itemSub.category_id) > -1}
+                                />
+                                <ListItemText primary={itemSub.name} />
+                              </MenuItem>
+                            ))}
+                          </AccordionDetails>
+                        </Accordion>
+                      </>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid
                 item
@@ -274,7 +310,7 @@ const AddProduct = () => {
                   color="primary"
                   variant="outlined"
                   className={classes.button}
-                  onClick={goToCategory}
+                  onClick={() => goTo(APP_CONFIG.ROUTE_CATEGORY)}
                 >
                   {APP_TEXTS.ADD_NEW_CATEGORY}
                 </Button>
@@ -319,8 +355,8 @@ const AddProduct = () => {
                     multiline
                     rows={4}
                     label="Descripción"
-                    helperText={`${values.description.length}/200`}
-                    error={values.description.length > 200}
+                    helperText={`${values.description.length}/2000`}
+                    error={values.description.length > 2000}
                     name="description"
                     onChange={handleChange}
                     required
@@ -369,10 +405,9 @@ const AddProduct = () => {
                   <TextField
                     fullWidth
                     label="Código/SKU"
-                    name="code"
+                    name="codeSKU"
                     onChange={handleChange}
-                    required
-                    value={values.code}
+                    value={values.codeSKU}
                     variant="outlined"
                   />
                 </Grid>

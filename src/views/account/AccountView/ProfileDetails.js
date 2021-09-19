@@ -1,12 +1,20 @@
+// React
 import React, { useState } from 'react';
+// Redux
 import { useSelector } from 'react-redux';
+// Props and Classes
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+// Material UI and icons
 import {
-  Box, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Grid,
+  TextField,
+  makeStyles,
 } from '@material-ui/core';
-import Address from 'src/views/address';
-// import APP_TEXTS from 'src/language/lang_ES';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -99,25 +107,7 @@ const ProfileDetails = ({ className, ...rest }) => {
             </Grid>
           </Grid>
         </CardContent>
-        {/* <Divider />
-         <Box
-          display="flex"
-          justifyContent="flex-end"
-          p={2}
-        >
-          <Button
-            color="primary"
-            variant="contained"
-          >
-            {APP_TEXTS.SAVE_CHANGES_BTN}
-          </Button>
-        </Box> */}
       </Card>
-      <Box
-        spacing={0}
-      >
-        <Address />
-      </Box>
     </form>
   );
 };

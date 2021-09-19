@@ -18,7 +18,6 @@ class ProductServiceApi {
   processResult(resp) {
     if (resp) {
       this.dataServer = resp;
-      console.log(this.dataServer);
     }
 
     return resp;
@@ -107,7 +106,6 @@ class ProductServiceApi {
       .then((response) => response.json())
       .then((resp) => {
         const result = this.processResult(resp);
-        console.log(result);
         return result;
       })
       .catch((error) => {
@@ -117,15 +115,15 @@ class ProductServiceApi {
   }
 
   /* DELETE PRODUCT */
-  async deleteProduct(token, idProduct) {
+  async deleteProduct(params) {
     let requestUrl = APP_CONFIG.API_ENDPOINT_BASE;
     requestUrl += APP_CONFIG.API_ENDPOINT_PRODUCT;
-    requestUrl += Number(idProduct);
+    requestUrl += Number(params.idProduct);
 
     let headers = {};
     headers = new Headers({
       'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
+      Authorization: `JWT ${params.token}`,
     });
 
     return fetch(requestUrl, {

@@ -26,7 +26,7 @@ import APP_TEXTS from 'src/language/lang_ES';
 // Services Api
 import LoginServiceApi from 'src/services/LoginServiceApi';
 // Constants of Configuration
-import APP_CONFIG from 'src/config/app.config';
+// import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -68,8 +68,8 @@ const ResetPassword = () => {
   const loginServiceApi = new LoginServiceApi();
 
   const goTo = () => {
-    const path = APP_CONFIG.ROUTE_HOME;
-    history.push(path);
+    // const path = APP_CONFIG.ROUTE_MAIN;
+    // history.push(path);
   };
 
   const goBack = () => {
@@ -82,14 +82,14 @@ const ResetPassword = () => {
     goTo();
   }
 
-  async function handleLogIn(event) {
+  async function handleReset(event) {
     event.preventDefault();
 
     const credentials = {
       username,
     };
 
-    loginServiceApi.obtainTokenRequest(credentials)
+    loginServiceApi.forgetPasswordRequest(credentials)
       .then((response) => {
         if (response) {
           processResultLogin(response);
@@ -120,7 +120,8 @@ const ResetPassword = () => {
               email: username,
             }}
             validationSchema={Yup.object().shape({
-              email: Yup.string().email('Ingresa un correo electrónico válido').max(255).required('Correo electrónico es requerido'),
+              email: Yup.string().email(APP_TEXTS.INVALID_EMAIL)
+                .max(255).required(APP_TEXTS.REQUIRED_MAIL),
             })}
           >
             {({
@@ -148,7 +149,7 @@ const ResetPassword = () => {
                   error={Boolean(touched.email && errors.email)}
                   fullWidth
                   helperText={touched.email && errors.email}
-                  label="Correo electrónico"
+                  label={APP_TEXTS.MAIL}
                   margin="normal"
                   name="email"
                   onChange={(event) => setUsername(event.currentTarget.value)}
@@ -164,7 +165,7 @@ const ResetPassword = () => {
                     size="large"
                     type="submit"
                     variant="contained"
-                    onClick={handleLogIn}
+                    onClick={handleReset}
                   >
                     {APP_TEXTS.RESET_PASSWORD}
                   </Button>

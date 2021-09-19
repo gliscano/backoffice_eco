@@ -48,6 +48,7 @@ const NavItem = ({
   href,
   icon,
   title,
+  disable,
   ...rest
 }) => {
   const classes = useStyles();
@@ -63,6 +64,7 @@ const NavItem = ({
         className={classes.button}
         component={RouterLink}
         to={href}
+        disabled={disable}
         startIcon={<SvgIcon className={classes.icon} component={icon} />}
       >
         <span className={classes.title}>
@@ -77,7 +79,8 @@ NavItem.propTypes = {
   className: PropTypes.string,
   href: PropTypes.string,
   icon: PropTypes.object,
-  title: PropTypes.string
+  title: PropTypes.string,
+  disable: PropTypes.bool
 };
 
 export default NavItem;

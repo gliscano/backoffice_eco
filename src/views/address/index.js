@@ -16,10 +16,20 @@ import {
   CardHeader,
   Divider,
   Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
   makeStyles,
   MenuItem,
   TextField,
+  Typography,
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import PlaceRoundedIcon from '@material-ui/icons/PlaceRounded';
 // Languague
 import APP_TEXTS from 'src/language/lang_ES';
 // Components
@@ -30,11 +40,19 @@ import Country from 'src/config/country_VE';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    marginTop: theme.spacing(1)
+    margin: theme.spacing(2)
   },
   button: {
     marginRight: theme.spacing(2)
   },
+  cardHeader: {
+    backgroundColor: theme.palette.blueGrey.main,
+  },
+  active: {
+    borderLeft: '2px solid #455a64',
+    color: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.main,
+  }
 }));
 
 const Address = ({ className, ...rest }) => {
@@ -48,6 +66,8 @@ const Address = ({ className, ...rest }) => {
   // state
   const [initialized, setInitialized] = useState(false);
   const [updateAddress, setUpdateAddress] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [addresses, setAdresses] = useState([]);
   const [values, setValues] = useState({
     addressId: (storeData.addressId) || '',
     city: (storeData.city) || '',
@@ -83,6 +103,10 @@ const Address = ({ className, ...rest }) => {
   };
 
   const setAddressInfo = (data) => {
+    if (data && data.length > 1) {
+      setAdresses(data);
+    }
+
     const address = (data.length) ? data[0] : data;
     if (!address || !address.address_id) {
       return;
@@ -108,8 +132,14 @@ const Address = ({ className, ...rest }) => {
     setStoreDataRedux(mainAddress);
   };
 
+  const handleEdit = (data) => {
+    setEditMode(true);
+    setAddressInfo(data);
+  };
+
   const handleAddress = (event) => {
     event.preventDefault();
+    setEditMode(false);
 
     const data = {
       addressId: values.addressId,
@@ -178,115 +208,174 @@ const Address = ({ className, ...rest }) => {
             <Card>
               <CardHeader
                 title="Mis Direcciones"
+                className={classes.cardHeader}
               />
               <Divider />
-              <CardContent>
-                <Grid
-                  container
-                  spacing={2}
+              {addresses.length > 1 && (
+                <List
+                  component="nav"
+                  aria-labelledby="list-categories"
                 >
+                  {addresses.map((address) => (
+                    <>
+                      <ListItem
+                        button
+                        id={address.street.replace(/\s/g, '')}
+                        key={address.street.replace(/\s/g, '')}
+                        activeClassName={classes.active}
+                        onClick={() => handleEdit(address)}
+                      >
+                        <ListItemIcon>
+                          <PlaceRoundedIcon />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={`${address.street} - ${address.property_id}`}
+                          secondary={(
+                            <>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="textPrimary"
+                              >
+                                {`${address.state} - ${address.city} (${address.postal_code})`}
+                              </Typography>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                color="textPrimary"
+                              >
+                                {address.extraInfo}
+                              </Typography>
+                            </>
+                          )}
+                        />
+                        <ListItemSecondaryAction>
+                          <IconButton
+                            edge="end"
+                            aria-label="edit"
+                            onClick={() => handleEdit(address)}
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                          <IconButton edge="end" aria-label="delete">
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                      <Divider />
+                    </>
+                  ))}
+                </List>
+              )}
+              {(values.street === '' || editMode) && (
+                <CardContent>
                   <Grid
-                    item
-                    md={6}
-                    xs={12}
+                    container
+                    spacing={2}
                   >
-                    <TextField
-                      fullWidth
-                      select
-                      label="Estado"
-                      name="state"
-                      value={values.state}
-                      onChange={handleChange}
-                      required
-                      variant="outlined"
+                    <Grid
+                      item
+                      md={6}
+                      xs={12}
                     >
-                      {Country.states.map((state) => (
-                        <MenuItem
-                          id={state.id}
-                          key={state.name}
-                          value={state.name}
-                        >
-                          {state.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                      <TextField
+                        fullWidth
+                        select
+                        label="Estado"
+                        name="state"
+                        value={values.state}
+                        onChange={handleChange}
+                        required
+                        variant="outlined"
+                      >
+                        {Country.states.map((state) => (
+                          <MenuItem
+                            id={state.id}
+                            key={state.name}
+                            value={state.name}
+                          >
+                            {state.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid
+                      item
+                      md={6}
+                      xs={12}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Cuidad"
+                        name="city"
+                        onChange={handleChange}
+                        required
+                        value={values.city}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={12}
+                      xs={12}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Calle"
+                        name="street"
+                        onChange={handleChange}
+                        required
+                        value={values.street}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={6}
+                      xs={12}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Nro. Casa/Edif"
+                        name="idProperty"
+                        onChange={handleChange}
+                        value={values.propertyId}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={6}
+                      xs={12}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Código Postal"
+                        name="postalCode"
+                        onChange={handleChange}
+                        value={values.postalCode}
+                        variant="outlined"
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      md={12}
+                      xs={12}
+                    >
+                      <TextField
+                        fullWidth
+                        label="Info. Adicional (Piso/Apartamento)"
+                        name="extraInfo"
+                        multiline
+                        rows={3}
+                        onChange={handleChange}
+                        value={values.extraInfo}
+                        variant="outlined"
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid
-                    item
-                    md={6}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Cuidad"
-                      name="city"
-                      onChange={handleChange}
-                      required
-                      value={values.city}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={12}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Calle"
-                      name="street"
-                      onChange={handleChange}
-                      required
-                      value={values.street}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={6}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Nro. Casa/Edif"
-                      name="idProperty"
-                      onChange={handleChange}
-                      value={values.propertyId}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={6}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Código Postal"
-                      name="postalCode"
-                      onChange={handleChange}
-                      value={values.postalCode}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid
-                    item
-                    md={12}
-                    xs={12}
-                  >
-                    <TextField
-                      fullWidth
-                      label="Info. Adicional (Piso/Apartamento)"
-                      name="extraInfo"
-                      multiline
-                      rows={3}
-                      onChange={handleChange}
-                      value={values.extraInfo}
-                      variant="outlined"
-                    />
-                  </Grid>
-                </Grid>
-              </CardContent>
+                </CardContent>
+              )}
               <Divider />
               <Box
                 display="flex"

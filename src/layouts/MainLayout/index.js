@@ -10,33 +10,18 @@ import APP_CONFIG from 'src/config/app.config';
 import LoginView from 'src/views/auth/LoginView';
 import NotFoundView from 'src/views/errors/NotFoundView';
 import RegisterView from 'src/views/auth/RegisterView';
-import ResetPassword from 'src/views/auth/ResetPassword';
+import ForgotPassword from 'src/views/auth/ForgotPassword';
+import Welcome from 'src/views/auth/Welcome';
+import ValidationDone from 'src/views/auth/ValidationDone';
 import TopBar from '../../components/TopBarMain';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: theme.palette.background.default,
-    display: 'flex',
-    height: '100%',
-    overflow: 'hidden',
-    width: '100%'
+    backgroundColor: theme.palette.background.dark,
   },
   wrapper: {
-    display: 'flex',
-    flex: '1 1 auto',
-    overflow: 'hidden',
-    paddingTop: 48
+    display: 'contents',
   },
-  contentContainer: {
-    display: 'flex',
-    flex: '1 1 auto',
-    overflow: 'hidden'
-  },
-  content: {
-    flex: '1 1 auto',
-    height: '100%',
-    overflow: 'auto'
-  }
 }));
 
 const MainLayout = () => {
@@ -45,44 +30,52 @@ const MainLayout = () => {
 
   return (
     <div className={classes.root}>
-      <TopBar />
+      <div>
+        <TopBar />
+      </div>
       <div className={classes.wrapper}>
-        <div className={classes.contentContainer}>
-          <div className={classes.content}>
-            <Switch>
-              <Route
-                exact
-                path={`${path}`}
-                component={LoginView}
-              />
-              <Route
-                exact
-                path={path.concat(APP_CONFIG.ROUTE_LOGIN)}
-                component={LoginView}
-              />
-              <Route
-                exact
-                path={path.concat(APP_CONFIG.ROUTE_REGISTER)}
-                component={RegisterView}
-              />
-              <Route
-                exact
-                path={path.concat(APP_CONFIG.ROUTE_RESET_PASSWORD)}
-                component={ResetPassword}
-              />
-              <Route
-                exact
-                path={`${path}404`}
-                component={NotFoundView}
-              />
-              <Route
-                exact
-                path={`${path}error`}
-                component={NotFoundView}
-              />
-            </Switch>
-          </div>
-        </div>
+        <Switch>
+          <Route
+            exact
+            path={`${path}`}
+            component={LoginView}
+          />
+          <Route
+            exact
+            path={path.concat(APP_CONFIG.ROUTE_LOGIN)}
+            component={LoginView}
+          />
+          <Route
+            exact
+            path={path.concat(APP_CONFIG.ROUTE_REGISTER)}
+            component={RegisterView}
+          />
+          <Route
+            exact
+            path={path.concat(APP_CONFIG.ROUTE_FORGOT_PASSWORD)}
+            component={ForgotPassword}
+          />
+          <Route
+            exact
+            path={path.concat(APP_CONFIG.ROUTE_VALIDATION_DONE)}
+            component={ValidationDone}
+          />
+          <Route
+            exact
+            path={path.concat(APP_CONFIG.ROUTE_WELCOME)}
+            component={Welcome}
+          />
+          <Route
+            exact
+            path={`${path}404`}
+            component={NotFoundView}
+          />
+          <Route
+            exact
+            path={`${path}error`}
+            component={NotFoundView}
+          />
+        </Switch>
       </div>
     </div>
   );

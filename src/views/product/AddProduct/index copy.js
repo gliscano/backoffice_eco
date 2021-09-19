@@ -1,9 +1,8 @@
 // React
 import React, { useEffect, useState } from 'react';
-import PropType from 'prop-types';
 // Redux and Router
 import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router';
+import { useHistory } from 'react-router';
 // Material IU
 import {
   Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles, MenuItem,
@@ -16,6 +15,7 @@ import AlertBar from 'src/components/AlertBar';
 // services Api
 import CategoryServiceApi from 'src/services/CategoryServiceApi';
 import ProductServiceApi from 'src/services/ProductServiceApi';
+import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,14 +33,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const EditProduct = () => {
-  // hooks
-  const classes = useStyles();
-  const userData = useSelector((state) => state.userData);
-  const storeData = useSelector((state) => state.storeData);
-  const history = useHistory();
-  const location = useLocation();
-  const { product } = location.state;
+const AddProduct = () => {
   // State
   const [category, setCategory] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
@@ -57,13 +50,12 @@ const EditProduct = () => {
   const [photos, setPhotos] = useState('');
   const [initialized, setInitialized] = useState(false);
   const [values, setValues] = useState({
-    product_id: (product && product.product_id) || null,
-    code: (product && product.code) || '',
-    description: (product && product.description) || '',
-    storeId: (product && product.storeId) || '',
-    price: (product && product.price) || '',
-    stock: (product && product.stock) || '',
-    title: (product && product.title) || '',
+    code: '',
+    description: '',
+    storeId: '',
+    price: '',
+    stock: '',
+    title: '',
   });
   const [alert, setAlert] = useState({
     open: false,
@@ -71,13 +63,17 @@ const EditProduct = () => {
     severity: 'success',
     callback: null,
   });
-
+  // hooks
+  const classes = useStyles();
+  const userData = useSelector((state) => state.userData);
+  const storeData = useSelector((state) => state.storeData);
+  const history = useHistory();
   // communication instance
   const categoryServiceApi = new CategoryServiceApi();
   const productServiceApi = new ProductServiceApi();
 
-  const goToCategory = () => {
-    history.push('/app/category');
+  const goTo = (path) => {
+    history.push(path);
   };
 
   const goBack = () => {
@@ -115,28 +111,6 @@ const EditProduct = () => {
     setSubCategSelected(newSubcateg);
   };
 
-  const preselectCategory = () => {
-    console.log('FALTA QUE LA API ENVIE CATEGORY_ID EN LOS PRODUCTOS');
-
-    /* if (!product && product.category_id) { return; }
-
-    // get category by ID
-    categoryServiceApi.getCategories(userData.token, product.category_id)
-      .then((response) => {
-        if (response && response.data) {
-          setCategory(response.data);
-          const { data } = response;
-          const newCateg = { ...selectedCategory };
-          newCateg.id = data.category_id;
-          newCateg.name = data.name;
-          newCateg.subcategories = data.subcategories;
-
-          setCategorySelected(newCateg);
-          setSubcategories(newCateg.subcategories);
-        }
-      }); */
-  };
-
   // Handle callback of dropZone component
   const handleCallbackPhotos = (metaPhotos) => {
     const urlPhotos = metaPhotos.map((photo) => photo.preview);
@@ -156,45 +130,56 @@ const EditProduct = () => {
     setAlert({
       ...alert,
       open: true,
-      message: (status) ? APP_TEXTS.MESSAGE_UPDATE_PRODUCT : APP_TEXTS.UPDATE_PRODUCT_ERROR,
+      message: (status) ? APP_TEXTS.MESSAGE_CREATE_PRODUCT : APP_TEXTS.CREATE_PRODUCT_ERROR,
       severity: (status) ? 'success' : 'error',
       callback: closeAlert,
     });
   };
 
-  const processResult = () => {
+  const processResult = (response) => {
+    console.log(response);
     const resultStatus = true;
     handleAlertBar(resultStatus);
+
+    setTimeout(() => {
+      goTo(APP_CONFIG.ROUTE_PRODUCTS);
+    }, 1000);
   };
 
-  // Request list category from Api
+  // Get list of products from Api
   const getCategories = () => {
     categoryServiceApi.getCategories(userData.token)
       .then((response) => {
         if (response && response.data) {
           setCategory(response.data);
-          preselectCategory();
+          if (response.data.length === 1) {
+            const data = response.data[0];
+            const { name } = data;
+            const subcateg = data.subcategories;
+            setCategorySelected(name);
+            setSubcategories(subcateg);
+          }
+        } else {
+          setCategory([]);
         }
       });
 
     return false;
   };
 
-  // Request to update product data in the API
-  const updateProduct = () => {
+  const addNewProduct = () => {
     const param = {
-      categoryId: selectedCategory.id,
       code: values.code,
       description: values.description,
-      photos,
       price: values.price,
-      product_id: values.product_id,
       stock: values.stock,
-      storeId: storeData.store_id,
-      subcategoryId: selectedSubcateg.id,
       title: values.title,
+      categoryId: selectedCategory.id,
+      subcategoryId: selectedSubcateg.id,
+      storeId: storeData.store_id,
       token: userData.token,
-      update: true,
+      photos,
+      update: false,
     };
 
     productServiceApi.createUpdateProduct(param)
@@ -224,7 +209,7 @@ const EditProduct = () => {
       >
         <Card>
           <CardHeader
-            title={APP_TEXTS.EDIT_PRODUCT_TITLE}
+            title={APP_TEXTS.ADD_PRODUCT_TITLE}
           />
           <Divider />
           <CardContent>
@@ -294,7 +279,7 @@ const EditProduct = () => {
                   color="primary"
                   variant="outlined"
                   className={classes.button}
-                  onClick={goToCategory}
+                  onClick={() => goTo(APP_CONFIG.ROUTE_CATEGORY)}
                 >
                   {APP_TEXTS.ADD_NEW_CATEGORY}
                 </Button>
@@ -358,6 +343,7 @@ const EditProduct = () => {
                     label="Precio"
                     name="price"
                     type="number"
+                    helperText="Moneda USD"
                     required
                     onChange={handleChange}
                     value={values.price}
@@ -373,6 +359,7 @@ const EditProduct = () => {
                   <TextField
                     fullWidth
                     label="Stock"
+                    helperText="Disponibles en Inventario"
                     name="stock"
                     onChange={handleChange}
                     value={values.stock}
@@ -387,7 +374,7 @@ const EditProduct = () => {
                   <TextField
                     fullWidth
                     label="Código/SKU"
-                    name="codeProduct"
+                    name="code"
                     onChange={handleChange}
                     required
                     value={values.code}
@@ -414,9 +401,9 @@ const EditProduct = () => {
               color="primary"
               variant="contained"
               className={classes.buttonActions}
-              onClick={updateProduct}
+              onClick={addNewProduct}
             >
-              {APP_TEXTS.SAVE_CHANGES_BTN}
+              {APP_TEXTS.ADD_PRODUCT}
             </Button>
           </Box>
         </Card>
@@ -435,8 +422,4 @@ const EditProduct = () => {
   );
 };
 
-EditProduct.propType = {
-  product: PropType.object
-};
-
-export default EditProduct;
+export default AddProduct;

@@ -1,6 +1,12 @@
+// React
 import React, { useState } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
+// Redux and Router
+import { useDispatch, useSelector } from 'react-redux';
+import { SET_STORE_DATA } from 'src/store/action_types';
+import { useHistory } from 'react-router';
+// Material IU and Icons
 import {
   Box,
   Button,
@@ -12,19 +18,22 @@ import {
   TextField,
   makeStyles,
   InputAdornment,
+  Tooltip,
   Typography,
+  IconButton,
 } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
-import UploadImage from 'src/components/UploadImage';
-import StoreServiceApi from 'src/services/StoreServiceApi';
-import { SET_STORE_DATA } from 'src/store/action_types';
-import Page from 'src/components/Page';
-import AlertBar from 'src/components/AlertBar';
-import { useHistory } from 'react-router';
-import APP_TEXTS from 'src/language/lang_ES';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
+import HelpIcon from '@material-ui/icons/Help';
+// Language
+import APP_TEXTS from 'src/language/lang_ES';
+// Components
+import UploadImage from 'src/components/UploadImage';
+import Page from 'src/components/Page';
+import AlertBar from 'src/components/AlertBar';
+// Services Api
+import StoreServiceApi from 'src/services/StoreServiceApi';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -124,7 +133,7 @@ const StoreEdit = ({ className, ...rest }) => {
       facebook: values.facebook,
       instagram: values.instagram,
       keywords: values.keywords,
-      userId: 3,
+      userId: userData.user_id,
       storeId: values.storeId,
       token: userData.token,
     };
@@ -280,15 +289,26 @@ const StoreEdit = ({ className, ...rest }) => {
                 md={6}
                 xs={12}
               >
-                <TextField
-                  fullWidth
-                  label="Palabras Claves SEO"
-                  name="keywords"
-                  onChange={handleChange}
-                  required
-                  value={values.keywords}
-                  variant="outlined"
-                />
+                <Tooltip title={APP_TEXTS.KEYWORD_RESEARCH}>
+                  <TextField
+                    fullWidth
+                    label="Palabras Claves SEO"
+                    name="keywords"
+                    onChange={handleChange}
+                    required
+                    value={values.keywords}
+                    variant="outlined"
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton>
+                            <HelpIcon />
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Tooltip>
               </Grid>
             </Grid>
           </CardContent>

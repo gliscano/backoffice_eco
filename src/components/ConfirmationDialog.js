@@ -17,7 +17,7 @@ const ConfirmationDialog = ({
   title,
   message,
   primaryButton,
-  // primaryColor,
+  primaryColor,
   secondaryButton,
   // secondaryColor,
   parentCallback,
@@ -47,8 +47,7 @@ const ConfirmationDialog = ({
         </DialogContent>
         <DialogActions>
           <Button
-            variant="contained"
-            color="secondary"
+            variant="text"
             onClick={() => handleResponse(false)}
           >
             {secondaryButton}
@@ -56,6 +55,7 @@ const ConfirmationDialog = ({
           <Button
             variant="contained"
             color="primary"
+            style={{ backgroundColor: primaryColor }}
             onClick={() => handleResponse(true)}
           >
             {primaryButton}
@@ -71,7 +71,7 @@ ConfirmationDialog.propTypes = {
   title: PropTypes.string,
   message: PropTypes.string,
   primaryButton: PropTypes.string,
-  // primaryColor: PropTypes.string,
+  primaryColor: PropTypes.string,
   secondaryButton: PropTypes.string,
   // secondaryColor: PropTypes.string,
   parentCallback: PropTypes.func,

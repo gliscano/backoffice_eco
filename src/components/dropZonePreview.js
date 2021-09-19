@@ -101,11 +101,11 @@ function DropZone({ parentCallback }) {
   const [files, setFiles] = useState([]);
   const { getRootProps, getInputProps } = useDropzone({
     accept: 'image/jpeg, image/jpg, image/png',
-    maxFiles,
     onDrop: (acceptedFiles) => {
-      const filesToAdd = files.length + acceptedFiles.length;
-      if (filesToAdd <= maxFiles) {
-        const newFiles = acceptedFiles.map((file) => Object.assign(file, {
+      const filesToAdd = maxFiles - files.length;
+      if (filesToAdd > 0 && filesToAdd <= maxFiles) {
+        const allowedFiles = acceptedFiles.slice(0, filesToAdd);
+        const newFiles = allowedFiles.map((file) => Object.assign(file, {
           preview: URL.createObjectURL(file)
         }));
         setFiles([...files, ...newFiles]);
@@ -178,7 +178,7 @@ function DropZone({ parentCallback }) {
             </Avatar>
           </Box>
           <br />
-          Formatos: PNG, JPG o JPEG - Max. 4
+          Máximo 4 fotografías en formatos: PNG, JPG o JPEG
         </p>
       </div>
     </Paper>

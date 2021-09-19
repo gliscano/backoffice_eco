@@ -11,11 +11,13 @@ import {
   CardContent,
   CardMedia,
   Grid,
+  IconButton,
   makeStyles,
   Typography,
 } from '@material-ui/core';
 import CreateIcon from '@material-ui/icons/Create';
 import LabelOffIcon from '@material-ui/icons/LabelOffRounded';
+import DeleteIcon from '@material-ui/icons/Delete';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 
@@ -64,6 +66,7 @@ const ProductCard = ({
   product,
   callbackEdit,
   callbackActive,
+  callbackDelete,
   ...rest
 }) => {
   const classes = useStyles();
@@ -76,6 +79,19 @@ const ProductCard = ({
     callbackActive(prod);
   };
 
+  const handleDelete = (prod) => {
+    callbackDelete(prod);
+  };
+
+  const getFirstImage = (url) => {
+    let newURL = [];
+    if (url) {
+      newURL = url.split(',');
+    }
+
+    return (newURL.length > 0) ? newURL[0] : imageDefault;
+  };
+
   return (
     <Card
       className={clsx(classes.root, className, (product.status === 'inactive' ? classes.inactive : ''))}
@@ -83,7 +99,7 @@ const ProductCard = ({
     >
       <CardContent className={classes.details}>
         <CardMedia
-          image={product.media || imageDefault}
+          image={getFirstImage(product.url_photos)}
           className={classes.imageLarge}
         />
         <Grid
@@ -131,9 +147,18 @@ const ProductCard = ({
         </Grid>
       </CardContent>
       <CardActions className={classes.actions}>
+        <IconButton
+          key="delete"
+          size="small"
+          aria-label="Delete Product"
+          onClick={() => handleDelete(product)}
+        >
+          <DeleteIcon />
+        </IconButton>
         <Button
           key="status"
           size="small"
+          variant="outlined"
           aria-label="status"
           onClick={() => handleActive(product)}
           startIcon={<LabelOffIcon />}
@@ -160,7 +185,8 @@ ProductCard.propTypes = {
   className: PropTypes.string,
   product: PropTypes.object.isRequired,
   callbackEdit: PropTypes.func,
-  callbackActive: PropTypes.func
+  callbackActive: PropTypes.func,
+  callbackDelete: PropTypes.func
 };
 
 export default ProductCard;

@@ -1,10 +1,14 @@
+// React
 import React, { useEffect } from 'react';
+// Redux and Router
 import { useSelector, useDispatch } from 'react-redux';
-import PropTypes from 'prop-types';
+import { CLEAR_USER_DATA } from 'src/store/action_types';
 import {
   Link as RouterLink,
   useLocation
 } from 'react-router-dom';
+import PropTypes from 'prop-types';
+// Material IU and Icons
 import {
   Avatar,
   Box,
@@ -17,61 +21,22 @@ import {
   Button,
   SvgIcon
 } from '@material-ui/core';
-import { CLEAR_USER_DATA } from 'src/store/action_types';
-import LoginServiceApi from 'src/services/LoginServiceApi';
-import TableChartIcon from '@material-ui/icons/TableChart';
-import StoreMallDirectoryRoundedIcon from '@material-ui/icons/StoreMallDirectoryRounded';
-import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
-import ContactsIcon from '@material-ui/icons/Contacts';
 import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import SettingsIcon from '@material-ui/icons/Settings';
+import BlurOnIcon from '@material-ui/icons/BlurOn';
+import ContactsIcon from '@material-ui/icons/Contacts';
 import InputIcon from '@material-ui/icons/Input';
+import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
+import SettingsIcon from '@material-ui/icons/Settings';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import StoreMallDirectoryRoundedIcon from '@material-ui/icons/StoreMallDirectoryRounded';
+import TableChartIcon from '@material-ui/icons/TableChart';
+// Service Api
+import LoginServiceApi from 'src/services/LoginServiceApi';
+// Constants of Configuration
+import APP_CONFIG from 'src/config/app.config';
+// Components
 import NavItem from './NavItem';
-
-const items = [
-  {
-    href: '/app/dashboard',
-    icon: TableChartIcon,
-    title: 'Dashboard'
-  },
-  {
-    href: '/app/orders',
-    icon: ShoppingCartIcon,
-    title: 'Pedidos'
-  },
-  {
-    href: '/app/customers',
-    icon: ContactsIcon,
-    title: 'Clientes'
-  },
-  {
-    href: '/app/products',
-    icon: LocalOfferIcon,
-    title: 'Productos'
-  },
-  {
-    href: '/app/category',
-    icon: PlaylistAddIcon,
-    title: 'Categoría'
-  },
-  {
-    href: '/app/store',
-    icon: StoreMallDirectoryRoundedIcon,
-    title: 'Tienda'
-  },
-  {
-    href: '/app/account',
-    icon: AssignmentIndIcon,
-    title: 'Mis Datos'
-  },
-  {
-    href: '/app/settings',
-    icon: SettingsIcon,
-    title: 'Configuración'
-  }
-];
 
 const useStyles = makeStyles((theme) => ({
   mobileDrawer: {
@@ -80,7 +45,8 @@ const useStyles = makeStyles((theme) => ({
   desktopDrawer: {
     width: 256,
     top: 64,
-    height: 'calc(100% - 64px)'
+    height: 'calc(100% - 64px)',
+    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)'
   },
   avatar: {
     cursor: 'pointer',
@@ -88,10 +54,67 @@ const useStyles = makeStyles((theme) => ({
     height: 64
   },
   boxItems: {
-    paddingTop: theme.spacing(1),
+    paddingTop: theme.spacing(0),
     paddingLeft: theme.spacing(2),
   }
 }));
+
+const items = [
+  {
+    href: `${APP_CONFIG.ROUTE_DASHBOARD}`,
+    icon: TableChartIcon,
+    title: 'Inicio',
+    show: true,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_STORE}`,
+    icon: StoreMallDirectoryRoundedIcon,
+    title: 'Tienda',
+    show: true,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_PRODUCTS}`,
+    icon: LocalOfferIcon,
+    title: 'Productos',
+    show: false,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_CATEGORY}`,
+    icon: PlaylistAddIcon,
+    title: 'Categoría',
+    show: false,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_ORDERS}`,
+    icon: ShoppingCartIcon,
+    title: 'Pedidos',
+    show: false,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_CUSTOMERS}`,
+    icon: ContactsIcon,
+    title: 'Clientes',
+    show: false,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_GENERATE_QR}`,
+    icon: BlurOnIcon,
+    title: 'Generar Código QR',
+    show: false,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_ADDRESS}`,
+    icon: AssignmentIndIcon,
+    title: 'Mis Direcciones',
+    show: true,
+  },
+  {
+    href: `${APP_CONFIG.ROUTE_SETTINGS}`,
+    icon: SettingsIcon,
+    title: 'Configuración',
+    show: true,
+  }
+];
 
 const NavBar = ({ onMobileClose, openMobile }) => {
   const classes = useStyles();
@@ -104,6 +127,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
     avatar: storeData.urlImageLogo || storeData.defaultLogo,
     name: storeData.name || '',
     slogan: storeData.slogan || '',
+    created: !!storeData.store_id,
   };
 
   const logout = () => {
@@ -131,7 +155,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
         alignItems="center"
         display="flex"
         flexDirection="column"
-        p={2}
+        p={1}
       >
         <Avatar
           className={classes.avatar}
@@ -162,6 +186,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
               key={item.title}
               title={item.title}
               icon={item.icon}
+              disable={(item.show) ? false : !store.created}
             />
           ))}
         </List>
