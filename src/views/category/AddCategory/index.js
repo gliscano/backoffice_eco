@@ -59,7 +59,10 @@ const AddCategory = ({
   const [selectedCategory, setCategorySelected] = useState('');
   const [selectedSubcateg, setSubCategSelected] = useState('');
   const [titleComponent, setTitleComponent] = useState(APP_TEXTS.ADD_ONE_CATEGORY);
+  const [titleCategBtn, setTitleCategBtn] = useState(APP_TEXTS.ADD_ONE_CATEGORY);
+  const [titleSubcategBtn, setTitleSubcategBtn] = useState(APP_TEXTS.ADD_ONE_SUBCATEGORY);
   const [registeredCategory, setRegisteredCategory] = useState(false);
+  const [disableSubcategory, setDisableSubcategory] = useState(true);
   const [initialized, setInitialized] = useState(false);
   // Hooks
   const classes = useStyles();
@@ -73,35 +76,41 @@ const AddCategory = ({
       setTitleComponent(APP_TEXTS.ADD_ONE_SUBCATEGORY);
     } else if (editMode && !itemToEdit.parent_category_id) {
       setTitleComponent(APP_TEXTS.TITLE_UPDATE_CATEGORY);
-    } else if (editMode && itemToEdit.parent_category_id >= 0) {
+      setTitleCategBtn(APP_TEXTS.EDIT_BTN);
+    } else if (editMode && !!itemToEdit.parent_category_id) {
       setTitleComponent(APP_TEXTS.TITLE_UPDATE_SUBCATEGORY);
+      setTitleSubcategBtn(APP_TEXTS.EDIT_BTN);
     }
   };
 
   const setDataToEdit = (dataToEdit) => {
-    if (!dataToEdit) { return; }
+    if (!dataToEdit || !editMode) { return; }
 
     if (!dataToEdit.parent_category_id) {
       setCategorySelected(dataToEdit.name);
     } else {
-      setRegisteredCategory(true);
       setSubCategSelected(dataToEdit.name);
       setCategorySelected(dataToEdit.categoryName);
+    }
+
+    if (itemToEdit.addSubcategory || !!itemToEdit.parent_category_id) {
+      setDisableSubcategory(false);
+      setRegisteredCategory(true);
     }
   };
 
   const addCategory = () => {
     if (!selectedCategory) { return false; }
 
-    const addedItem = category.filter((item) => {
-      return item.name === selectedCategory;
-    });
+    // const addedItem = category.filter((item) => {
+    //   return item.name === selectedCategory;
+    // });
 
-    if (addedItem.length) {
-      setRegisteredCategory(true);
-      // mostrar mensaje
-      return false;
-    }
+    // if (addedItem.length) {
+    //   setRegisteredCategory(true);
+    //   // mostrar mensaje
+    //   return false;
+    // }
 
     let newItem = {
       name: selectedCategory,
@@ -131,16 +140,19 @@ const AddCategory = ({
         (item) => (item.name === selectedSubcateg)
       );
 
-      const newSubCateg = {
+      const newItemSubcateg = {
         name: selectedSubcateg,
         parent_category_id: parentCategoryId,
         update: updateItem && !!updateItem.length,
       };
 
-      if (editMode) {
-        //
-      }
-      callbackAddEdit(newSubCateg);
+      // if (editMode) {
+      //   newItemSubcateg = { ...newItemSubcateg, ...itemToEdit };
+      //   newItemSubcateg.name = selectedSubcateg;
+      //   newItemSubcateg.update = (!itemToEdit.addSubcategory);
+      // }
+
+      callbackAddEdit(newItemSubcateg);
     }
 
     return true;
@@ -148,25 +160,28 @@ const AddCategory = ({
 
   const updateCategorySelected = (e) => {
     const value = (e.target && e.target.value) || ((typeof e === 'string') ? e : '');
-
-    const addedItem = category.filter((item) => {
-      return item.name === value;
-    });
-
     setCategorySelected(value);
-    setRegisteredCategory(!!addedItem.length);
-    setSubCategSelected('');
+
+    // const addedItem = category.filter((item) => {
+    //   return item.name === value;
+    // });
+
+    // setRegisteredCategory(!!addedItem.length);
+    // setSubCategSelected('');
   };
 
   const updateSubcategSelected = (e) => {
-    if (e.target && e.target.value) {
-      setSubCategSelected(e.target.value);
-    } else if (e.categ && e.subcateg) {
-      setCategorySelected(e.categ);
-      setSubCategSelected(e.subcateg);
-    } else {
-      setSubCategSelected('');
-    }
+    const value = (e.target && e.target.value) || ((typeof e === 'string') ? e : '');
+    setSubCategSelected(value);
+
+    // if (e.target && e.target.value) {
+    //   setSubCategSelected(e.target.value);
+    // } else if (e.categ && e.subcateg) {
+    //   setCategorySelected(e.categ);
+    //   setSubCategSelected(e.subcateg);
+    // } else {
+    //   setSubCategSelected('');
+    // }
   };
 
   useEffect(() => {
@@ -239,7 +254,7 @@ const AddCategory = ({
                       onClick={addCategory}
                       disabled={registeredCategory}
                     >
-                      {(editMode) ? APP_TEXTS.EDIT_BTN : APP_TEXTS.ADD_CATEGORY}
+                      {titleCategBtn}
                     </Button>
                   </Grid>
                   <div className={classes.break} />
@@ -252,9 +267,9 @@ const AddCategory = ({
                       id="grouped-Category"
                       size="small"
                       variant="outlined"
-                      label="Agregar Subcategoría"
+                      label={APP_TEXTS.ADD_ONE_SUBCATEGORY}
                       fullWidth
-                      disabled={!registeredCategory}
+                      disabled={disableSubcategory}
                       value={selectedSubcateg}
                       onChange={updateSubcategSelected}
                     />
@@ -268,10 +283,10 @@ const AddCategory = ({
                       fullWidth
                       color="primary"
                       variant="contained"
-                      disabled={!registeredCategory}
+                      disabled={disableSubcategory}
                       onClick={addSubcategory}
                     >
-                      {(editMode) ? APP_TEXTS.EDIT_BTN : APP_TEXTS.ADD_SUBCATEGORY}
+                      {titleSubcategBtn}
                     </Button>
                   </Grid>
                 </Grid>

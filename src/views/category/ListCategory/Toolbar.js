@@ -80,6 +80,7 @@ const Toolbar = ({
             fullWidth
             size="small"
             className={classes.searchField}
+            disabled
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -87,7 +88,7 @@ const Toolbar = ({
                 </InputAdornment>
               )
             }}
-            placeholder={APP_TEXTS.SEARCH_PRODUCT}
+            placeholder={APP_TEXTS.SEARCH_CATEGORY}
             variant="outlined"
           />
         </Grid>

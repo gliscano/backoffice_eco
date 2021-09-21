@@ -62,23 +62,31 @@ const APP_TEXTS = {
   REQUIRED_PASSWORD_LOG: 'La contraseña debe tener al menos 8 caracteres',
 
   // MESSAGE
-  VALIDATE_CREDENTIALS: 'Por favor, valide su usuario y contraseña!',
-  VALIDATE_MAIL: 'Ingresa un correo eletrónico válido!',
   CONFIRMATION_TITLE: 'Mensaje de Confirmación',
 
+  // ERRORS
+  CREATE_STORE_ERROR: 'Error al intentar crear la tienda, intente nuevamente!',
+  CREATE_PRODUCT_ERROR: 'Error al agregar el producto, intente nuevamente!',
+  DELETE_STORE_ERROR: 'La tienda no pudo ser eliminada!',
+  DELETE_PRODUCT_ERROR: 'El productono pudo ser eliminado!',
+  UPDATE_STORE_ERROR: 'Error al actualizar la tienda, intente nuevamente!',
+  UPDATE_PRODUCT_ERROR: 'Error al actualizar el producto, intente nuevamente!',
+
   // LOGIN, REGISTER, FORGOT PASSWORD AND VERIFY ACCOUNT PAGE
-  WELCOME: 'Hola,',
-  SIGN_UP_TITLE: 'Registrate',
   EMAIL_NOT_MATCH: 'El correo electrónico no coincide',
-  SIGN_UP_SUBTITLE: 'Crea una nueva cuenta y comienza a Gestionar tu Tienda!!!',
-  FORGOT_PASSWORD_TITLE: '¿Olvidaste tu contraseña?',
   FORGOT_PASSWORD_MESSAGE: 'Ingrese la dirección de correo electrónico asociada con su cuenta y le enviaremos un correo electrónico para restablecer su contraseña.',
+  FORGOT_PASSWORD_TITLE: '¿Olvidaste tu contraseña?',
   INVALID_EMAIL: 'Ingresa un correo electrónico válido',
-  VERIFY_ACCOUNT_TITLE: 'Verifica tu cuenta',
-  VERIFY_ACCOUNT_MESSAGE: 'Bienvenido/Bienvenida a [NOMBRE_APP], antes de comenzar, por favor valide su correo electrónico',
-  VALIDATION_DONE_TITLE: 'Cuenta Validada!!!',
-  VALIDATION_DONE_MESSAGE: 'Tu cuenta ha sido validada, ...',
   KEYWORD_RESEARCH: 'Las palabras claves (keywords) consiste en ... con el fin de ...',
+  SIGN_UP_SUBTITLE: 'Crea una nueva cuenta y comienza a Gestionar tu Tienda!!!',
+  SIGN_UP_TITLE: 'Registrate',
+  VALIDATE_CREDENTIALS: 'Por favor, valide su usuario y contraseña!',
+  VALIDATE_MAIL: 'Ingresa un correo eletrónico válido!',
+  VALIDATION_DONE_MESSAGE: 'Tu cuenta ha sido validada, ...',
+  VALIDATION_DONE_TITLE: 'Cuenta Validada!!!',
+  VERIFY_ACCOUNT_MESSAGE: 'Bienvenido/Bienvenida a [NOMBRE_APP], antes de comenzar, por favor valide su correo electrónico',
+  VERIFY_ACCOUNT_TITLE: 'Verifica tu cuenta',
+  WELCOME: 'Hola,',
 
   // STORE PAGE
   MESSAGE_CREATE_STORE: 'Felicidades, la tienda ha sido creada!',
@@ -92,39 +100,34 @@ const APP_TEXTS = {
   KEYWORDS_STORE: 'Palabras Claves SEO',
 
   // PRODUCT PAGE
-  ADD_PRODUCT_TITLE: 'Agregar Producto',
-  EDIT_PRODUCT_TITLE: 'Actualizar Producto',
-  MESSAGE_CREATE_PRODUCT: 'El producto fue agregado correctamente, recuerda compartir en tus redes sociales',
-  MESSAGE_UPDATE_PRODUCT: 'El producto fue actualizado!',
-  MESSAGE_DELETE_PRODUCT: 'El producto fue eliminado de la tienda!',
-  CONFIRM_DELETE_PRODUCT: 'Desea eliminar el producto de manera permanente?',
   ACTIVE_PRODUCT: 'Reactivaste tu publicación.',
-  INACTIVE_PRODUCT: '¡Listo! Pausaste la publicación.',
-  SEARCH_PRODUCT: 'Buscar Producto',
+  ADD_PRODUCT_TITLE: 'Agregar Producto',
   CATEGORY_LABEL: 'Seleccione una o más categorías',
+  CONFIRM_DELETE_PRODUCT: 'Desea eliminar el producto de manera permanente?',
+  EDIT_PRODUCT_TITLE: 'Actualizar Producto',
+  INACTIVE_PRODUCT: '¡Listo! Pausaste la publicación.',
+  MESSAGE_CREATE_PRODUCT: 'El producto fue agregado correctamente, recuerda compartir en tus redes sociales',
+  MESSAGE_DELETE_PRODUCT: 'El producto fue eliminado de la tienda!',
+  MESSAGE_UPDATE_PRODUCT: 'El producto fue actualizado!',
+  SEARCH_PRODUCT: 'Buscar Producto',
 
   // CATEGORY PAGE
   ADD_ONE_CATEGORY: 'Agregar Categoría',
   ADD_ONE_SUBCATEGORY: 'Agregar Subcategoría',
-  TITLE_UPDATE_CATEGORY: 'Actualizar Categoría',
-  TITLE_UPDATE_SUBCATEGORY: 'Actualizar Subcategoría',
-  CATEGORY_REGISTERED: 'Categoría registrada',
   CATEGORIES_AVAILABLE: 'Categorias disponibles en tu tienda',
+  CATEGORY_REGISTERED: 'Categoría registrada',
+  SEARCH_CATEGORY: 'Buscar Categoría',
   SUBCATEGORIES_AVAILABLE: 'Subcategorias',
   SUBCATEGORIES_NOT_AVAILABLE: 'No tienes subcategorias',
+  TITLE_UPDATE_CATEGORY: 'Actualizar Categoría',
+  TITLE_UPDATE_SUBCATEGORY: 'Actualizar Subcategoría',
+  MESSAGE_ADD_EDIT_CATEGORY: 'La Categoría fue agregada o actualizada correctamente',
+  MESSAGE_ADD_EDIT_SUBCATEGORY: 'La Subcategoría fue agregada o actualizada correctamente',
 
   // SETTINGS
   NOTIFICATIONS_TITLE: 'Notificaciones',
   NOTIFICATIONS_SUBTITLE: 'Gestionar las notificaciones',
   CURRENCY_AND_LANGUAGE_TITLE: 'Moneda e Idioma',
-
-  // ERRORS
-  CREATE_STORE_ERROR: 'Error al intentar crear la tienda, intente nuevamente!',
-  CREATE_PRODUCT_ERROR: 'Error al agregar el producto, intente nuevamente!',
-  DELETE_STORE_ERROR: 'La tienda no pudo ser eliminada!',
-  DELETE_PRODUCT_ERROR: 'El productono pudo ser eliminado!',
-  UPDATE_STORE_ERROR: 'Error al actualizar la tienda, intente nuevamente!',
-  UPDATE_PRODUCT_ERROR: 'Error al actualizar el producto, intente nuevamente!',
 
   // API ERRORS
   ERR_UNKNOWN: 'Error desconocido. Por favor contacte a issues@nombreplataforma.com',

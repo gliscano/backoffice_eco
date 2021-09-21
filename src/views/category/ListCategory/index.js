@@ -50,6 +50,12 @@ const ListCategory = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [itemToEdit, setItemToEdit] = useState({});
+  const [alert, setAlert] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
   // Hooks
   const classes = useStyles();
   const userData = useSelector((state) => state.userData);
@@ -66,10 +72,32 @@ const ListCategory = () => {
     setItemToEdit({});
   };
 
+  const showAlert = (data) => {
+    setAlert({
+      open: true,
+      message: data.message,
+      severity: (data.error) ? 'error' : 'success',
+    });
+  };
+
+  const hideAlert = () => {
+    setAlert({
+      open: false,
+      message: '',
+      severity: 'success',
+    });
+  };
+
   const getCategories = () => {
     categoryServiceApi.getCategories(userData.token)
       .then((response) => {
         if (response && response.data) {
+          // const sortedResult = response.data.sort((a, b) => {
+          //   if (a.name > b.name) { return 1; }
+          //   if (a.name < b.name) { return -1; }
+
+          //   return 0;
+          // });
           setCategory(response.data);
         } else {
           setCategory([]);
@@ -109,6 +137,15 @@ const ListCategory = () => {
       .then((response) => {
         if (response && response.data) {
           getCategories();
+
+          const message = (!response.data.parent_category_id)
+            ? APP_TEXTS.MESSAGE_ADD_EDIT_CATEGORY : APP_TEXTS.MESSAGE_ADD_EDIT_SUBCATEGORY;
+
+          showAlert({
+            message,
+            error: false,
+          });
+          hideDialog();
         }
       });
   };
@@ -229,9 +266,9 @@ const ListCategory = () => {
       <AlertBar
         open={alert.open}
         message={alert.message}
-        primaryButton={alert.button}
         severity={alert.status}
-        parentCallback={alert.callback}
+        parentCallback={hideAlert}
+        primaryButton={APP_TEXTS.ACCEPT_BTN}
       />
       )}
     </Page>
