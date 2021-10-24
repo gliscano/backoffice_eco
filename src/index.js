@@ -6,12 +6,13 @@ import theme from 'src/theme';
 import GlobalStyles from 'src/components/GlobalStyles';
 import Routes from 'src/router/Routes';
 import store from './store/store';
+import firebaseApp from './firebase';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render((
   <ThemeProvider theme={theme}>
     <GlobalStyles />
-    <Provider store={store}>
+    <Provider store={store} firebase={firebaseApp}>
       <Routes />
     </Provider>
   </ThemeProvider>

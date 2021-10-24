@@ -6,8 +6,27 @@ import { useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 // Material IU
 import {
-  Box, Button, Card, CardContent, CardHeader, Divider, Grid, TextField, makeStyles, MenuItem,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  ListItemText,
+  makeStyles,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
 } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 // Components
@@ -43,28 +62,22 @@ const EditProduct = () => {
   const { product } = location.state;
   // State
   const [category, setCategory] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-  const [selectedCategory, setCategorySelected] = useState([{
-    name: '',
-    id: '',
-    subcategories: [],
-  }]);
-  const [selectedSubcateg, setSubCategSelected] = useState([{
-    name: '',
-    id: '',
-    subcategories: [],
-  }]);
-  const [photos, setPhotos] = useState('');
+  const [categoryPreview, setCategoryPreview] = useState({
+    categories: [],
+  });
+  const [selectedCategory, setCategorySelected] = useState([]);
   const [initialized, setInitialized] = useState(false);
   const [values, setValues] = useState({
     product_id: (product && product.product_id) || null,
-    code: (product && product.code) || '',
+    codeSKU: (product && product.code) || '',
     description: (product && product.description) || '',
     storeId: (product && product.storeId) || '',
     price: (product && product.price) || '',
     stock: (product && product.stock) || '',
     title: (product && product.title) || '',
+    photos: (product && product.url_photos) || '',
   });
+  const [photos, setPhotos] = useState(values.photos);
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -91,56 +104,79 @@ const EditProduct = () => {
     });
   };
 
-  const changeCategory = (event) => {
-    const data = event.target.value;
+  const changeCategory = (data) => {
     if (!data || !data.category_id) {
       return;
     }
 
-    const newCateg = { ...selectedCategory };
-    newCateg.id = data.category_id;
-    newCateg.name = data.name;
-    newCateg.subcategories = data.subcategories;
+    let newArray = [];
+    let newArrayPreview = [];
+    const preview = [...categoryPreview.categories];
 
-    setCategorySelected(newCateg);
-    setSubcategories(newCateg.subcategories);
+    if (selectedCategory.indexOf(data.category_id) > -1) {
+      newArray = selectedCategory.filter((item) => item !== data.category_id);
+      newArrayPreview = preview.filter((item) => item !== data.name);
+    } else {
+      newArray = [...selectedCategory];
+      newArray.push(data.category_id);
+      newArrayPreview = [...preview];
+      newArrayPreview.push(data.name);
+    }
+
+    setCategorySelected(newArray);
+    setCategoryPreview((prevState) => ({
+      ...prevState,
+      categories: newArrayPreview,
+    }));
   };
 
-  const changeSubcategory = (event) => {
+  /* const changeSubcategory = (event) => {
     const data = event.target.value;
     const newSubcateg = {
       id: data.category_id,
       name: data.name,
     };
     setSubCategSelected(newSubcateg);
-  };
+  }; */
 
-  const preselectCategory = () => {
-    console.log('FALTA QUE LA API ENVIE CATEGORY_ID EN LOS PRODUCTOS');
+  const preselectCategory = (categories) => {
+    const categoryId = product.category_id[0];
+    let categoryName = '';
 
-    /* if (!product && product.category_id) { return; }
+    let getCategory = categories.filter((item) => {
+      if (item.category_id === categoryId) {
+        return item;
+      }
 
-    // get category by ID
-    categoryServiceApi.getCategories(userData.token, product.category_id)
-      .then((response) => {
-        if (response && response.data) {
-          setCategory(response.data);
-          const { data } = response;
-          const newCateg = { ...selectedCategory };
-          newCateg.id = data.category_id;
-          newCateg.name = data.name;
-          newCateg.subcategories = data.subcategories;
+      const { subcategories } = item;
+      const subCategory = subcategories.filter((subItem) => subItem.category_id === categoryId);
+      return (subCategory.length > 0) ? subCategory : false;
+    });
+    getCategory = (getCategory.length > 0) ? getCategory[0] : getCategory;
 
-          setCategorySelected(newCateg);
-          setSubcategories(newCateg.subcategories);
-        }
-      }); */
+    if (getCategory && getCategory.category_id === categoryId) {
+      categoryName = getCategory.name;
+    } else if (getCategory && getCategory.subcategories.length) {
+      const { subcategories } = getCategory;
+      const subCategory = subcategories.filter((subItem) => subItem.category_id === categoryId);
+      categoryName = (subCategory.length) ? subCategory[0].name : categoryName;
+    }
+
+    // const categoryName = (newArrayPreview.length) ? newArrayPreview[0].name : ;
+    // console.log(newArrayPreview);
+
+    setCategorySelected([categoryId]);
+    setCategoryPreview((prevState) => ({
+      ...prevState,
+      categories: [categoryName],
+    }));
   };
 
   // Handle callback of dropZone component
   const handleCallbackPhotos = (metaPhotos) => {
-    const urlPhotos = metaPhotos.map((photo) => photo.preview);
-    setPhotos(urlPhotos[0]);
+    const arrayPhotos = metaPhotos.map((photo) => photo.preview);
+    const urlPhotos = arrayPhotos[0] || values.photos;
+    setPhotos(urlPhotos);
   };
 
   const closeAlert = () => {
@@ -165,6 +201,10 @@ const EditProduct = () => {
   const processResult = () => {
     const resultStatus = true;
     handleAlertBar(resultStatus);
+
+    setTimeout(() => {
+      goBack();
+    }, 1000);
   };
 
   // Request list category from Api
@@ -173,7 +213,7 @@ const EditProduct = () => {
       .then((response) => {
         if (response && response.data) {
           setCategory(response.data);
-          preselectCategory();
+          preselectCategory(response.data);
         }
       });
 
@@ -182,16 +222,16 @@ const EditProduct = () => {
 
   // Request to update product data in the API
   const updateProduct = () => {
+    const categ = selectedCategory.slice(0, 1);
     const param = {
-      categoryId: selectedCategory.id,
-      code: values.code,
+      categoryId: categ,
+      code: values.codeSKU,
       description: values.description,
       photos,
       price: values.price,
       product_id: values.product_id,
       stock: values.stock,
       storeId: storeData.store_id,
-      subcategoryId: selectedSubcateg.id,
       title: values.title,
       token: userData.token,
       update: true,
@@ -234,55 +274,49 @@ const EditProduct = () => {
             >
               <Grid
                 item
-                md={4}
+                md={8}
                 xs={12}
               >
-                <TextField
-                  fullWidth
-                  select
-                  required
-                  name="category"
-                  label="Categoría"
-                  value={selectedCategory.name}
-                  defaultValue=""
-                  onChange={changeCategory}
-                  variant="outlined"
-                  size="small"
-                >
-                  {category.map((item) => (
-                    <MenuItem
-                      key={item.name}
-                      value={item}
-                    >
-                      {item.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid
-                item
-                md={4}
-                xs={12}
-              >
-                <TextField
-                  fullWidth
-                  select
-                  label="Subcategoría"
-                  name="subcategory"
-                  onChange={changeSubcategory}
-                  value={selectedSubcateg.name}
-                  variant="outlined"
-                  size="small"
-                >
-                  {subcategories.map((itemSub) => (
-                    <MenuItem
-                      key={itemSub.name}
-                      value={itemSub}
-                    >
-                      {itemSub.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                <FormControl variant="outlined" fullWidth size="small">
+                  <InputLabel id={APP_TEXTS.CATEGORY_LABEL}>{APP_TEXTS.CATEGORY_LABEL}</InputLabel>
+                  <Select
+                    required
+                    name="category"
+                    label={APP_TEXTS.CATEGORY_LABEL}
+                    labelId={APP_TEXTS.CATEGORY_LABEL}
+                    value={categoryPreview.categories}
+                    renderValue={(selected) => selected.join(', ')}
+                  >
+                    {category.map((item) => (
+                      <>
+                        <Accordion>
+                          <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1"
+                          >
+                            <Typography>{item.name}</Typography>
+                          </AccordionSummary>
+                          <AccordionDetails>
+                            {item.subcategories.map((itemSub) => (
+                              <MenuItem
+                                key={itemSub.category_id}
+                                className={classes.itemSubcategory}
+                                onClick={() => changeCategory(itemSub)}
+                              >
+                                <Checkbox
+                                  id={itemSub.category_id}
+                                  checked={selectedCategory.indexOf(itemSub.category_id) > -1}
+                                />
+                                <ListItemText primary={itemSub.name} />
+                              </MenuItem>
+                            ))}
+                          </AccordionDetails>
+                        </Accordion>
+                      </>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid
                 item

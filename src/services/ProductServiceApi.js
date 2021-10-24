@@ -35,9 +35,7 @@ class ProductServiceApi {
       requestUrl += `${params.product_id}`;
     }
 
-    const categ = params.subcategoryId || params.categoryId;
-    const categoryId = [categ];
-
+    const categoryId = params.subcategoryId || params.categoryId;
     const data = JSON.stringify({
       category_id: categoryId,
       code: params.code,

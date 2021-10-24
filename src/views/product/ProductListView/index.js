@@ -61,7 +61,6 @@ const ProductList = () => {
     open: false,
     message: '',
     severity: 'success',
-    button: APP_TEXTS.ACCEPT_BTN,
     callback: null,
   });
   // hooks
@@ -73,8 +72,8 @@ const ProductList = () => {
 
   const closeAlert = () => {
     setAlert({
-      ...alert,
       open: false,
+      severity: '',
       message: '',
       callback: null,
     });
@@ -82,9 +81,8 @@ const ProductList = () => {
 
   const handleAlertBar = (status, message) => {
     setAlert({
-      ...alert,
       open: true,
-      message: (status) ? message.ok : message.failed,
+      message,
       severity: (status) ? 'success' : 'error',
       callback: closeAlert,
     });
@@ -110,10 +108,29 @@ const ProductList = () => {
     history.push(to);
   };
 
+  const getProductsByStore = () => {
+    const { token } = userData;
+
+    productServiceApi.getProducts(token)
+      .then((response) => {
+        if (response && response.products && response.products.length) {
+          setProducts(response.products);
+          setShowLoading(false);
+        } else {
+          setProducts([]);
+          setShowLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.log(`ERROR LOADING PRODUCTS: ERROR: ${error}`);
+      });
+  };
+
   const callbackActive = (product) => {
     const { token } = userData;
     const param = { ...product };
     param.photos = product.url_photos;
+    param.categoryId = product.category_id;
     param.status = (product.status === 'active') ? 'inactive' : 'active';
     param.storeId = storeData.store_id;
     param.token = token;
@@ -121,33 +138,16 @@ const ProductList = () => {
 
     productServiceApi.createUpdateProduct(param)
       .then((response) => {
+        let resultStatus = false;
+        let message = APP_TEXTS.PAUSE_PRODUCT_ERROR;
+
         if (response && response.products) {
-          const resultStatus = true;
-          const message = {
-            ok: APP_TEXTS.ACTIVE_PRODUCT,
-            failed: APP_TEXTS.INACTIVE_PRODUCT
-          };
-          handleAlertBar(resultStatus, message);
+          resultStatus = true;
+          message = (response.products.status === 'active') ? APP_TEXTS.MESSAGE_ACTIVE_PRODUCT : APP_TEXTS.MESSAGE_INACTIVE_PRODUCT;
         }
-      });
-  };
 
-  const getProductsByStore = () => {
-    const { token } = userData;
-    setShowLoading(true);
-
-    productServiceApi.getProducts(token)
-      .then((response) => {
-        console.log(response);
-        if (response && response.products && response.products.length) {
-          setProducts(response.products);
-          setShowLoading(false);
-        } else {
-          setShowLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.log(`ERROR LOADING PRODUCTS: ERROR: ${error}`);
+        handleAlertBar(resultStatus, message);
+        getProductsByStore();
       });
   };
 
@@ -161,21 +161,22 @@ const ProductList = () => {
 
     productServiceApi.deleteProduct(param)
       .then((response) => {
+        let resultStatus = false;
+        let message = APP_TEXTS.DELETE_PRODUCT_ERROR;
         if (response) {
-          const resultStatus = true;
-          const message = {
-            ok: APP_TEXTS.MESSAGE_DELETE_PRODUCT,
-            failed: APP_TEXTS.DELETE_PRODUCT_ERROR
-          };
-          handleAlertBar(resultStatus, message);
-          getProductsByStore();
+          resultStatus = true;
+          message = APP_TEXTS.MESSAGE_DELETE_PRODUCT;
         }
+
+        handleAlertBar(resultStatus, message);
+        getProductsByStore();
       });
   };
 
   useEffect(() => {
     if (!initialized) {
       setInitialized(true);
+      setShowLoading(true);
       getProductsByStore();
     }
   }, []);
@@ -214,7 +215,7 @@ const ProductList = () => {
                 />
               </Grid>
             ))}
-            {((products.length === 0) && (
+            {((products.length === 0 && !showLoading) && (
               <Grid
                 item
                 xs={12}
@@ -253,7 +254,7 @@ const ProductList = () => {
           open={alert.open}
           message={alert.message}
           primaryButton={alert.button}
-          severity={alert.status}
+          severity={alert.severity}
           parentCallback={alert.callback}
         />
         )}

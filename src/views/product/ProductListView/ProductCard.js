@@ -10,8 +10,8 @@ import {
   CardActions,
   CardContent,
   CardMedia,
+  Chip,
   Grid,
-  IconButton,
   makeStyles,
   Typography,
 } from '@material-ui/core';
@@ -20,6 +20,8 @@ import LabelOffIcon from '@material-ui/icons/LabelOffRounded';
 import DeleteIcon from '@material-ui/icons/Delete';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
+// utils
+// import APP_UTILS from 'src/config/app.utils';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -51,15 +53,22 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
   inactive: {
-    border: '1px solid red',
+    border: '1px solid #F75B4A',
     opacity: 0.6,
+  },
+  stock: {
+    backgroundColor: theme.palette.green.light,
+    color: theme.palette.text.primary,
+  },
+  outStock: {
+    backgroundColor: theme.palette.red.light,
+    color: theme.palette.text.white,
   },
   actions: {
     justifyContent: 'space-between',
+    paddingTop: 0,
   },
 }));
-
-const imageDefault = '/static/images/products/box_products.png';
 
 const ProductCard = ({
   className,
@@ -83,13 +92,31 @@ const ProductCard = ({
     callbackDelete(prod);
   };
 
+  const getStock = (stock) => {
+    let label = APP_TEXTS.STOCK_LABEL;
+    if (stock !== 1000000) {
+      label = (stock <= 0) ? APP_TEXTS.STOCK_OUT_LABEL : `${label}: ${stock} ${APP_TEXTS.STOCK_AVAILABLE}`;
+    }
+    return label;
+  };
+
+  const setFormatCurrency = (value) => {
+    // return APP_UTILS.currencyFormat(number);
+    const currencyFormat = new Intl.NumberFormat('id', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
+
+    return currencyFormat;
+  };
+
   const getFirstImage = (url) => {
     let newURL = [];
     if (url) {
       newURL = url.split(',');
     }
 
-    return (newURL.length > 0) ? newURL[0] : imageDefault;
+    return (newURL.length > 0 && newURL[0]);
   };
 
   return (
@@ -121,40 +148,38 @@ const ProductCard = ({
             </Typography>
             <Typography
               color="primary"
-              variant="button"
+              variant="h6"
               display="block"
-              gutterBottom
             >
-              Precio:
-              {' '}
-              {product.price}
+              {`${APP_TEXTS.PRICE_LABEL}: ${setFormatCurrency(product.price)}`}
             </Typography>
+            <br />
+            <Chip
+              size="small"
+              label={(getStock(product.stock))}
+              className={(product.stock > 0) ? classes.stock : classes.outStock}
+            />
             <Typography
               color="textSecondary"
               variant="body2"
               gutterBottom
             >
-              {`Stock.: ${product.stock} unid.`}
-            </Typography>
-            <Typography
-              color="textSecondary"
-              variant="body2"
-              gutterBottom
-            >
-              {product.status}
+              {(product.status === 'active')
+                ? APP_TEXTS.ACTIVE_PRODUCT_LABEL : APP_TEXTS.INACTIVE_PRODUCT_LABEL}
             </Typography>
           </Grid>
         </Grid>
       </CardContent>
       <CardActions className={classes.actions}>
-        <IconButton
+        <Button
           key="delete"
           size="small"
           aria-label="Delete Product"
           onClick={() => handleDelete(product)}
+          startIcon={<DeleteIcon />}
         >
-          <DeleteIcon />
-        </IconButton>
+          {APP_TEXTS.DELETE_BTN}
+        </Button>
         <Button
           key="status"
           size="small"
@@ -174,7 +199,7 @@ const ProductCard = ({
           onClick={() => handleEdit(product)}
           startIcon={<CreateIcon />}
         >
-          {APP_TEXTS.EDIT_PRODUCT_BTN}
+          {APP_TEXTS.EDIT_BTN}
         </Button>
       </CardActions>
     </Card>

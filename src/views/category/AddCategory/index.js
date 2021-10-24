@@ -76,10 +76,10 @@ const AddCategory = ({
       setTitleComponent(APP_TEXTS.ADD_ONE_SUBCATEGORY);
     } else if (editMode && !itemToEdit.parent_category_id) {
       setTitleComponent(APP_TEXTS.TITLE_UPDATE_CATEGORY);
-      setTitleCategBtn(APP_TEXTS.EDIT_BTN);
+      setTitleCategBtn(APP_TEXTS.UPDATE_BTN);
     } else if (editMode && !!itemToEdit.parent_category_id) {
       setTitleComponent(APP_TEXTS.TITLE_UPDATE_SUBCATEGORY);
-      setTitleSubcategBtn(APP_TEXTS.EDIT_BTN);
+      setTitleSubcategBtn(APP_TEXTS.UPDATE_BTN);
     }
   };
 

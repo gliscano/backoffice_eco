@@ -1,6 +1,15 @@
 const APP_CONFIG = {
-  // Store
+  // ENVS
   API_ENDPOINT_BASE: process.env.REACT_APP_API_ENDPOINT_BASE,
+  FIREBASE_APIKEY: process.env.REACT_APP_FIREBASE_APIKEY,
+  FIREBASE_AUTHDOMAIN: process.env.REACT_APP_FIREBASE_AUTHDOMAIN,
+  FIREBASE_PROJECTID: process.env.REACT_APP_FIREBASE_PROJECTID,
+  FIREBASE_STORAGEBUCKET: process.env.REACT_APP_FIREBASE_STORAGEBUCKET,
+  FIREBASE_MESSAGINGSENDERID: process.env.REACT_APP_FIREBASE_MESSAGINGSENDERID,
+  FIREBASE_APPID: process.env.REACT_APP_FIREBASE_APPID,
+  FIREBASE_MEASUREMENTID: process.env.REACT_APP_FIREBASE_MEASUREMENTID,
+
+  // API - USER ENDPOINTS
   API_ENDPOINT_ADDRESS: 'user/address/',
   API_ENDPOINT_ADDRESS_INFO: 'user/address_info/',
   API_ENDPOINT_CREATE_USER: 'user/create/',
@@ -8,7 +17,8 @@ const APP_CONFIG = {
   API_ENDPOINT_TOKEN_UPDATE: 'user/token/refresh/',
   API_ENDPOINT_FORGOT_PASSWORD: 'user/forgot_password/',
   API_ENDPOINT_RESET_PASSWORD: 'user/reset_password/',
-  // Store
+
+  // API STORE ENDPOINTS
   API_ENDPOINT_GET_USER_BY_ID: 'user/users/',
   API_ENDPOINT_CATEGORY: 'store/categories/',
   API_ENDPOINT_SUBCATEGORY: 'store/subcategories/',
@@ -18,7 +28,7 @@ const APP_CONFIG = {
   API_ENDPOINT_PRODUCT: 'store/products/',
   API_ENDPOINT_STORE: 'store/stores/',
 
-  // Path
+  // Route Path
   ROUTE_ACCOUNT: '/app/account',
   ROUTE_ADDRESS: '/app/address',
   ROUTE_CATEGORY: '/app/category',

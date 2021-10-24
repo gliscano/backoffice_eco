@@ -26,15 +26,18 @@ import {
   TextField,
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-// Language
+// Language and Config
 import APP_TEXTS from 'src/language/lang_ES';
+import APP_CONFIG from 'src/config/app.config';
 // Components
 import DropZone from 'src/components/dropZonePreview';
 import AlertBar from 'src/components/AlertBar';
 // services Api
 import CategoryServiceApi from 'src/services/CategoryServiceApi';
 import ProductServiceApi from 'src/services/ProductServiceApi';
-import APP_CONFIG from 'src/config/app.config';
+
+import storage from 'src/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -62,22 +65,15 @@ const useStyles = makeStyles((theme) => ({
 const AddProduct = () => {
   // State
   const [category, setCategory] = useState([]);
-  // const [subcategories, setSubcategories] = useState([]);
   const [selectedCategory, setCategorySelected] = useState([]);
+  const [initialized, setInitialized] = useState(false);
+  const [photos, setPhotos] = useState([]);
   const [categoryPreview, setCategoryPreview] = useState({
     categories: [],
   });
-  // const [selectedSubcateg, setSubCategSelected] = useState([{
-  //   name: '',
-  //   id: '',
-  //   subcategories: [],
-  // }]);
-  const [photos, setPhotos] = useState('');
-  const [initialized, setInitialized] = useState(false);
   const [values, setValues] = useState({
     codeSKU: '',
     description: '',
-    storeId: '',
     price: '',
     stock: '',
     title: '',
@@ -96,6 +92,11 @@ const AddProduct = () => {
   // communication instance
   const categoryServiceApi = new CategoryServiceApi();
   const productServiceApi = new ProductServiceApi();
+  // constants
+  const urlDefaultImage = '/static/images/products/notAvailable.jpg';
+  // variable
+  let urlPhotos = urlDefaultImage;
+  let updateProduct = false;
 
   const goTo = (path) => {
     history.push(path);
@@ -138,20 +139,44 @@ const AddProduct = () => {
     }));
   };
 
-  /* const changeSubcategory = (event) => {
-    const data = event.target.value;
-    const newSubcateg = {
-      id: data.category_id,
-      name: data.name,
-    };
-    setSubCategSelected(newSubcateg);
-  }; */
+  const uploadPhotos = (product) => {
+    if (!photos.length) { return false; }
+
+    const promises = photos.map((photo) => {
+      const fileRef = ref(storage, `${storeData.store_id}/${product.product_id}/${photo.name}`);
+      // Create the file metadata
+      // const metadata = {
+      //   contentType: 'image/jpeg'
+      // };
+      return uploadBytes(fileRef, photo);
+
+      // uploadTask.on(
+      //   'state_changed',
+      //   (snapshot) => {
+      //     const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes)) * 100;
+      //     // this.setState({progress})
+      //     console.log(progress);
+      //     return progress;
+      //   },
+      //   (error) => {
+      //     throw error;
+      //   },
+      //   () => {
+      //     uploadTask.snapshot.ref.getDownloadURL()
+      //       .then((url) => urlPhotos.concat(url))
+      //       .catch(() => urlPhotos.concat(urlDefaultImage));
+      //   }
+      // );
+    });
+
+    return promises;
+  };
 
   // Handle callback of dropZone component
   const handleCallbackPhotos = (metaPhotos) => {
-    const urlPhotos = metaPhotos.map((photo) => photo.preview);
-    const urlString = (urlPhotos.length > 0) ? urlPhotos.join() : '';
-    setPhotos(urlString);
+    if (!metaPhotos || metaPhotos.length === 0) { return; }
+
+    setPhotos(metaPhotos);
   };
 
   const closeAlert = () => {
@@ -171,16 +196,6 @@ const AddProduct = () => {
       severity: (status) ? 'success' : 'error',
       callback: closeAlert,
     });
-  };
-
-  const processResult = (response) => {
-    console.log(response);
-    const resultStatus = true;
-    handleAlertBar(resultStatus);
-
-    setTimeout(() => {
-      goTo(APP_CONFIG.ROUTE_PRODUCTS);
-    }, 1000);
   };
 
   // Get list of products from Api
@@ -204,25 +219,69 @@ const AddProduct = () => {
     return false;
   };
 
-  const addNewProduct = () => {
+  const getDataToApi = () => {
     const skuRandom = Math.floor(12345 * Math.random());
+    const categ = selectedCategory.slice(0, 1);
     const param = {
+      categoryId: categ,
       code: values.codeSKU || skuRandom,
       description: values.description,
+      photos: urlPhotos,
       price: values.price,
-      stock: values.stock,
-      title: values.title,
-      categoryId: selectedCategory[0],
+      stock: values.stock || 1000000,
       storeId: storeData.store_id,
+      title: values.title,
       token: userData.token,
-      photos,
-      update: false,
+      update: updateProduct,
     };
+
+    return param;
+  };
+
+  const updateUrlImage = async (loadingPhotos, productCreated) => {
+    const images = await Promise.all(loadingPhotos);
+    const urlPromises = images.map((img) => getDownloadURL(img.ref));
+    const urls = await Promise.all(urlPromises);
+    urlPhotos = urls.join();
+
+    // update product
+    updateProduct = true;
+    const params = getDataToApi();
+    const propsToUpdate = {
+      ...params,
+      codeSKU: productCreated.code,
+      categoryId: productCreated.category_id,
+      product_id: productCreated.product_id,
+    };
+
+    productServiceApi.createUpdateProduct(propsToUpdate)
+      .then((response) => {
+        if (response && response.products) {
+          const resultStatus = true;
+          handleAlertBar(resultStatus);
+
+          setTimeout(() => {
+            goTo(APP_CONFIG.ROUTE_PRODUCTS);
+          }, 1000);
+        }
+      });
+  };
+
+  const processResult = (prod) => {
+    // upload image in Storage Cloud
+    const loadingPhotos = uploadPhotos(prod);
+    if (loadingPhotos) {
+      updateUrlImage(loadingPhotos, prod);
+    }
+  };
+
+  const addNewProduct = () => {
+    const param = getDataToApi();
 
     productServiceApi.createUpdateProduct(param)
       .then((response) => {
         if (response && response.products) {
-          processResult(response);
+          processResult(response.products);
         }
       });
   };

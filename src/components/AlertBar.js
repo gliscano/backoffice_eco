@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+// Material IU and Icons
 import {
-  Button,
   makeStyles,
   Slide,
   Snackbar
@@ -26,7 +26,6 @@ const AlertBar = ({
   open,
   message,
   severity,
-  primaryButton,
   parentCallback,
 }) => {
   // hooks
@@ -56,15 +55,7 @@ const AlertBar = ({
           severity={severity}
           className={classes.alert}
           variant="filled"
-          action={(
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={handleResponse}
-            >
-              {primaryButton}
-            </Button>
-          )}
+          onClose={handleResponse}
         >
           {message}
         </Alert>
@@ -77,7 +68,6 @@ AlertBar.propTypes = {
   open: PropTypes.bool,
   message: PropTypes.string,
   severity: PropTypes.string,
-  primaryButton: PropTypes.string,
   parentCallback: PropTypes.func,
 };
 

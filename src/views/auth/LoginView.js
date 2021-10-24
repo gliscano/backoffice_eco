@@ -171,7 +171,7 @@ const LoginView = () => {
             goTo(dataStore);
           }, 1000);
         });
-    } else if (loginData.code && loginData.message) {
+    } else if ((loginData.code >= 0) && loginData.message) {
       setMessage({
         show: true,
         type: loginData.type,
