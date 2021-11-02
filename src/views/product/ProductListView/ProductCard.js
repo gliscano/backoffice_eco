@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 // Material IU and Icons
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -32,7 +33,8 @@ const useStyles = makeStyles((theme) => ({
   item: {
     width: '100%',
     alignItems: 'left',
-    display: 'block'
+    display: 'flex',
+    flexDirection: 'column',
   },
   statsIcon: {
     marginRight: theme.spacing(1)
@@ -50,11 +52,19 @@ const useStyles = makeStyles((theme) => ({
     height: '150px',
     minHeight: '100%',
     backgroundSize: 'contain',
-    padding: theme.spacing(1),
+    borderRadius: '5px',
+    border: `1px solid ${theme.palette.blueGrey.main}`,
+    marginRight: theme.spacing(1),
   },
   inactive: {
     border: '1px solid #F75B4A',
     opacity: 0.6,
+  },
+  detailsProduct: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    marginTop: '15px',
   },
   stock: {
     backgroundColor: theme.palette.green.light,
@@ -128,6 +138,7 @@ const ProductCard = ({
         <CardMedia
           image={getFirstImage(product.url_photos)}
           className={classes.imageLarge}
+          alt={`${product.title} photography`}
         />
         <Grid
           container
@@ -141,32 +152,33 @@ const ProductCard = ({
           >
             <Typography
               color="primary"
-              variant="h5"
+              variant="subtitle2"
               gutterBottom
             >
               {product.title}
             </Typography>
             <Typography
               color="primary"
-              variant="h6"
+              variant="body2"
               display="block"
             >
               {`${APP_TEXTS.PRICE_LABEL}: ${setFormatCurrency(product.price)}`}
             </Typography>
-            <br />
-            <Chip
-              size="small"
-              label={(getStock(product.stock))}
-              className={(product.stock > 0) ? classes.stock : classes.outStock}
-            />
-            <Typography
-              color="textSecondary"
-              variant="body2"
-              gutterBottom
-            >
-              {(product.status === 'active')
-                ? APP_TEXTS.ACTIVE_PRODUCT_LABEL : APP_TEXTS.INACTIVE_PRODUCT_LABEL}
-            </Typography>
+            <Box className={classes.detailsProduct}>
+              <Typography
+                color="textSecondary"
+                variant="caption"
+                gutterBottom
+              >
+                {(product.status === 'active')
+                  ? APP_TEXTS.ACTIVE_PRODUCT_LABEL : APP_TEXTS.INACTIVE_PRODUCT_LABEL}
+              </Typography>
+              <Chip
+                size="small"
+                label={(getStock(product.stock))}
+                className={(product.stock > 0) ? classes.stock : classes.outStock}
+              />
+            </Box>
           </Grid>
         </Grid>
       </CardContent>

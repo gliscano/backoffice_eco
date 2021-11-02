@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DropZone({ parentCallback }) {
+function DropZone({ parentCallback, filesToPreview = [] }) {
   const maxFiles = 4;
   const classes = useStyles();
   const [files, setFiles] = useState([]);
@@ -120,7 +120,11 @@ function DropZone({ parentCallback }) {
   };
 
   useEffect(() => {
-    parentCallback(files);
+    if (files.length > 0) {
+      parentCallback(files);
+      // revoke the data uris to avoid memory leaks
+      files.forEach((file) => URL.revokeObjectURL(file.preview));
+    }
   }, [files]);
 
   const thumbs = files.map((file) => (
@@ -152,9 +156,13 @@ function DropZone({ parentCallback }) {
   ));
 
   useEffect(() => () => {
-    // Make sure to revoke the data uris to avoid memory leaks
-    files.forEach((file) => URL.revokeObjectURL(file.preview));
-  }, [files]);
+    const filesToadd = filesToPreview.map((url) => {
+      const data = { preview: url };
+      return data;
+    });
+    const filesAdded = [...files, ...filesToadd];
+    setFiles(filesAdded);
+  }, [filesToPreview]);
 
   return (
     <Paper className={classes.paper} elevation={2}>
@@ -186,7 +194,8 @@ function DropZone({ parentCallback }) {
 }
 
 DropZone.propTypes = {
-  parentCallback: PropTypes.func
+  parentCallback: PropTypes.func,
+  filesToPreview: PropTypes.array
 };
 
 export default DropZone;

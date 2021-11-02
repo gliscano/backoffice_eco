@@ -75,9 +75,9 @@ const EditProduct = () => {
     price: (product && product.price) || '',
     stock: (product && product.stock) || '',
     title: (product && product.title) || '',
-    photos: (product && product.url_photos) || '',
+    photos: (product && product.url_photos) || [],
   });
-  const [photos, setPhotos] = useState(values.photos);
+  const [photos, setPhotos] = useState([]);
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -95,6 +95,15 @@ const EditProduct = () => {
 
   const goBack = () => {
     history.goBack();
+  };
+
+  const getPhotosFromData = () => {
+    const urlData = product.url_photos;
+    let urls = urlData.split(',');
+    urls = (urls.length > 0) ? urls : [];
+
+    setPhotos(urls);
+    return urls;
   };
 
   const handleChange = (event) => {
@@ -130,15 +139,6 @@ const EditProduct = () => {
     }));
   };
 
-  /* const changeSubcategory = (event) => {
-    const data = event.target.value;
-    const newSubcateg = {
-      id: data.category_id,
-      name: data.name,
-    };
-    setSubCategSelected(newSubcateg);
-  }; */
-
   const preselectCategory = (categories) => {
     const categoryId = product.category_id[0];
     let categoryName = '';
@@ -162,9 +162,6 @@ const EditProduct = () => {
       categoryName = (subCategory.length) ? subCategory[0].name : categoryName;
     }
 
-    // const categoryName = (newArrayPreview.length) ? newArrayPreview[0].name : ;
-    // console.log(newArrayPreview);
-
     setCategorySelected([categoryId]);
     setCategoryPreview((prevState) => ({
       ...prevState,
@@ -176,6 +173,7 @@ const EditProduct = () => {
   const handleCallbackPhotos = (metaPhotos) => {
     const arrayPhotos = metaPhotos.map((photo) => photo.preview);
     const urlPhotos = arrayPhotos[0] || values.photos;
+
     setPhotos(urlPhotos);
   };
 
@@ -249,6 +247,7 @@ const EditProduct = () => {
     if (!initialized) {
       setInitialized(true);
       getCategories();
+      getPhotosFromData();
     }
   }, []);
 
@@ -342,8 +341,8 @@ const EditProduct = () => {
                   fullWidth
                   name="title"
                   label="Titulo del Producto"
-                  helperText={`${values.title.length}/200`}
-                  error={values.title.length > 200}
+                  helperText={`${values.title.length}/60`}
+                  error={values.title.length > 60}
                   onChange={handleChange}
                   required
                   value={values.title}
@@ -354,7 +353,7 @@ const EditProduct = () => {
             <Box
               className={classes.drop}
             >
-              <DropZone parentCallback={handleCallbackPhotos} />
+              <DropZone parentCallback={handleCallbackPhotos} filesToPreview={photos} />
             </Box>
             <Box
               spacing={1}
@@ -373,8 +372,8 @@ const EditProduct = () => {
                     multiline
                     rows={4}
                     label="Descripción"
-                    helperText={`${values.description.length}/200`}
-                    error={values.description.length > 200}
+                    helperText={`${values.description.length}/2000`}
+                    error={values.description.length > 2000}
                     name="description"
                     onChange={handleChange}
                     required

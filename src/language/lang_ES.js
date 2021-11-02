@@ -104,6 +104,11 @@ const APP_TEXTS = {
   // PRODUCT PAGE
   PRICE_LABEL: 'Precio',
   STOCK_LABEL: 'Stock',
+  TITLE_LABEL: 'Título del Producto',
+  DESCRIPTION_LABEL: 'Descripción',
+  CODE_SKU_LABEL: 'Código/SKU"',
+  CURRENCY_USD_HELPER: 'Moneda USD',
+  STOCK_AVAILABLE_HELPER: 'Disponibles en Inventario',
   STOCK_OUT_LABEL: 'Agotado',
   STOCK_AVAILABLE: 'disponible (s)',
   ACTIVE_PRODUCT_LABEL: 'Producto activo',

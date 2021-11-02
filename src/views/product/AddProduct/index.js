@@ -382,9 +382,9 @@ const AddProduct = () => {
                 <TextField
                   fullWidth
                   name="title"
-                  label="Titulo del Producto"
-                  helperText={`${values.title.length}/200`}
-                  error={values.title.length > 200}
+                  label={APP_TEXTS.TITLE_LABEL}
+                  helperText={`${values.title.length}/60`}
+                  error={values.title.length > 60}
                   onChange={handleChange}
                   required
                   value={values.title}
@@ -413,7 +413,7 @@ const AddProduct = () => {
                     fullWidth
                     multiline
                     rows={4}
-                    label="Descripción"
+                    label={APP_TEXTS.DESCRIPTION_LABEL}
                     helperText={`${values.description.length}/2000`}
                     error={values.description.length > 2000}
                     name="description"
@@ -430,10 +430,10 @@ const AddProduct = () => {
                 >
                   <TextField
                     fullWidth
-                    label="Precio"
+                    label={APP_TEXTS.PRICE_LABEL}
                     name="price"
                     type="number"
-                    helperText="Moneda USD"
+                    helperText={APP_TEXTS.CURRENCY_USD_HELPER}
                     required
                     onChange={handleChange}
                     value={values.price}
@@ -448,8 +448,8 @@ const AddProduct = () => {
                 >
                   <TextField
                     fullWidth
-                    label="Stock"
-                    helperText="Disponibles en Inventario"
+                    label={APP_TEXTS.STOCK_LABEL}
+                    helperText={APP_TEXTS.STOCK_AVAILABLE_HELPER}
                     name="stock"
                     onChange={handleChange}
                     value={values.stock}
@@ -463,7 +463,7 @@ const AddProduct = () => {
                 >
                   <TextField
                     fullWidth
-                    label="Código/SKU"
+                    label={APP_TEXTS.CODE_SKU_LABEL}
                     name="codeSKU"
                     onChange={handleChange}
                     value={values.codeSKU}

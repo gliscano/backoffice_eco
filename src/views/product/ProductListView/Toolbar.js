@@ -99,16 +99,12 @@ const Toolbar = ({ className, products, ...rest }) => {
           <Box
             className={classes.buttonsGroup}
           >
-            <Box
-              className={classes.boxPublications}
-            >
+            <Box className={classes.boxPublications}>
               <Typography
                 variant="body2"
                 gutterBottom
               >
-                {products}
-                {' '}
-                {'productos'}
+                {`${products} Prod.`}
               </Typography>
             </Box>
             <Button
