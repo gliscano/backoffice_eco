@@ -78,6 +78,7 @@ const EditProduct = () => {
     photos: (product && product.url_photos) || [],
   });
   const [photos, setPhotos] = useState([]);
+  const [photosToPreview, setPhotosToPreview] = useState([]);
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -100,10 +101,9 @@ const EditProduct = () => {
   const getPhotosFromData = () => {
     const urlData = product.url_photos;
     let urls = urlData.split(',');
-    urls = (urls.length > 0) ? urls : [];
+    urls = (urls.length > 0) ? [...urls] : [];
 
-    setPhotos(urls);
-    return urls;
+    setPhotosToPreview(urls);
   };
 
   const handleChange = (event) => {
@@ -353,7 +353,7 @@ const EditProduct = () => {
             <Box
               className={classes.drop}
             >
-              <DropZone parentCallback={handleCallbackPhotos} filesToPreview={photos} />
+              <DropZone parentCallback={handleCallbackPhotos} filesToPreview={photosToPreview} />
             </Box>
             <Box
               spacing={1}

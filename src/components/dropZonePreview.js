@@ -127,68 +127,78 @@ function DropZone({ parentCallback, filesToPreview = [] }) {
     }
   }, [files]);
 
-  const thumbs = files.map((file) => (
-    <Grid
-      className={classes.thumb}
-      key={file.name}
-    >
-      <Card className={classes.imageCard}>
-        <CardMedia
-          className={classes.img}
-          image={file.preview}
-          title={file.name}
-        >
-          <CardActions
-            className={classes.actionsCard}
-          >
-            <IconButton
-              aria-label="delete"
-              size="small"
-              className={classes.button}
-              onClick={() => deleteImage(file)}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </CardActions>
-        </CardMedia>
-      </Card>
-    </Grid>
-  ));
+  useEffect(() => {
+    if (filesToPreview && filesToPreview.length > 0) {
+      const filesToAdd = filesToPreview.map((url) => {
+        const data = {
+          preview: url,
+          name: url
+        };
+        return data;
+      });
 
-  useEffect(() => () => {
-    const filesToadd = filesToPreview.map((url) => {
-      const data = { preview: url };
-      return data;
-    });
-    const filesAdded = [...files, ...filesToadd];
-    setFiles(filesAdded);
+      setFiles([...files, ...filesToAdd]);
+    }
   }, [filesToPreview]);
 
   return (
     <Paper className={classes.paper} elevation={2}>
       <aside className={classes.thumbsContainer}>
-        {thumbs}
-      </aside>
-      <div
-        className={classes.dropZoneCustom}
-        {...getRootProps({ className: clsx('dropzone', classes.dropZoneCustom) })}
-      >
-        <input
-          {...getInputProps()}
-        />
-        <p className={classes.textCenter}>
-          <Box className={classes.boxIcons}>
-            <Avatar
-              size="large"
-              className={classes.icon}
+        {
+          files.map((file) => (
+            <Grid
+              className={classes.thumb}
+              key={file.name}
             >
-              <AddPhotoAlternateIcon />
-            </Avatar>
+              <Card className={classes.imageCard}>
+                <CardMedia
+                  className={classes.img}
+                  image={file.preview}
+                  title={file.name}
+                >
+                  <CardActions
+                    className={classes.actionsCard}
+                  >
+                    <IconButton
+                      aria-label="delete"
+                      size="small"
+                      className={classes.button}
+                      onClick={() => deleteImage(file)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </CardActions>
+                </CardMedia>
+              </Card>
+            </Grid>
+          ))
+        }
+      </aside>
+      {
+      (files.length < maxFiles)
+      && (
+        <div
+          className={classes.dropZoneCustom}
+          {...getRootProps({ className: clsx('dropzone', classes.dropZoneCustom) })}
+        >
+          <input
+            {...getInputProps()}
+          />
+          <Box className={classes.textCenter}>
+            <Box className={classes.boxIcons}>
+              <Avatar
+                size="large"
+                className={classes.icon}
+              >
+                <AddPhotoAlternateIcon />
+              </Avatar>
+            </Box>
+            <br />
+            Máximo 4 fotografías en formatos: PNG, JPG o JPEG
           </Box>
-          <br />
-          Máximo 4 fotografías en formatos: PNG, JPG o JPEG
-        </p>
-      </div>
+        </div>
+      )
+      }
     </Paper>
   );
 }
