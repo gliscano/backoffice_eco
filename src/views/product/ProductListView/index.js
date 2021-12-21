@@ -18,6 +18,9 @@ import APP_TEXTS from 'src/language/lang_ES';
 import ProductServiceApi from 'src/services/ProductServiceApi';
 // theme
 import ThemeCustom from 'src/theme';
+// Firebase
+import storage from 'src/firebase';
+import { ref, listAll } from 'firebase/storage';
 // Components
 import Page from 'src/components/Page';
 import AlertBar from 'src/components/AlertBar';
@@ -52,11 +55,11 @@ const useStyles = makeStyles((theme) => ({
 const ProductList = () => {
   // States
   const classes = useStyles();
-  const [initialized, setInitialized] = useState(false);
-  const [showLoading, setShowLoading] = useState(true);
   const [currentProductID, setCurrentProductID] = useState(null);
-  const [products, setProducts] = useState([]);
+  const [initialized, setInitialized] = useState(false);
   const [openDialogConfirm, setOpenDialogConfirm] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [showLoading, setShowLoading] = useState(true);
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -126,6 +129,25 @@ const ProductList = () => {
       });
   };
 
+  const deletePhotos = () => {
+    const listRef = ref(storage, `${storeData.store_id}/${currentProductID}`);
+    listAll(listRef)
+      .then((res) => {
+        res.prefixes.forEach((folderRef) => {
+          // All the prefixes under listRef.
+          // You may call listAll() recursively on them.
+          console.log(folderRef);
+        });
+        res.items.forEach((itemRef) => {
+          // All the items under listRef.
+          console.log(itemRef);
+        });
+      }).catch((error) => {
+        // Uh-oh, an error occurred!
+        console.error(error);
+      });
+  };
+
   const callbackActive = (product) => {
     const { token } = userData;
     const param = { ...product };
@@ -161,15 +183,14 @@ const ProductList = () => {
 
     productServiceApi.deleteProduct(param)
       .then((response) => {
-        let resultStatus = false;
-        let message = APP_TEXTS.DELETE_PRODUCT_ERROR;
-        if (response) {
-          resultStatus = true;
-          message = APP_TEXTS.MESSAGE_DELETE_PRODUCT;
-        }
+        const resultStatus = !!(response);
+        const message = (response)
+          ? APP_TEXTS.MESSAGE_DELETE_PRODUCT
+          : APP_TEXTS.DELETE_PRODUCT_ERROR;
 
         handleAlertBar(resultStatus, message);
         getProductsByStore();
+        deletePhotos();
       });
   };
 
