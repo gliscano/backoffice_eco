@@ -144,29 +144,7 @@ const AddProduct = () => {
 
     const promises = photos.map((photo) => {
       const fileRef = ref(storage, `${storeData.store_id}/${product.product_id}/${photo.name}`);
-      // Create the file metadata
-      // const metadata = {
-      //   contentType: 'image/jpeg'
-      // };
       return uploadBytes(fileRef, photo);
-
-      // uploadTask.on(
-      //   'state_changed',
-      //   (snapshot) => {
-      //     const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes)) * 100;
-      //     // this.setState({progress})
-      //     console.log(progress);
-      //     return progress;
-      //   },
-      //   (error) => {
-      //     throw error;
-      //   },
-      //   () => {
-      //     uploadTask.snapshot.ref.getDownloadURL()
-      //       .then((url) => urlPhotos.concat(url))
-      //       .catch(() => urlPhotos.concat(urlDefaultImage));
-      //   }
-      // );
     });
 
     return promises;
@@ -433,7 +411,6 @@ const AddProduct = () => {
                     label={APP_TEXTS.PRICE_LABEL}
                     name="price"
                     type="number"
-                    helperText={APP_TEXTS.CURRENCY_USD_HELPER}
                     required
                     onChange={handleChange}
                     value={values.price}

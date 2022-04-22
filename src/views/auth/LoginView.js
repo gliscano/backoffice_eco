@@ -27,7 +27,6 @@ import { Alert } from '@material-ui/lab';
 import CloseIcon from '@material-ui/icons/Close';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import FacebookIcon from 'src/assets/icons/facebook.svg';
 import GoogleColorsIcon from 'src/assets/icons/google.svg';
 // components
 import Page from 'src/components/Page';
@@ -147,30 +146,28 @@ const LoginView = () => {
       });
   }
 
+  const initializeApp = async (loginData) => {
+    const infoByUser = getInfoByUser(loginData.user_id, loginData.token);
+    const storesByUser = getStoresByUser(loginData.user_id, loginData.token);
+
+    const response = await Promise.all([infoByUser, storesByUser]);
+    const dataUser = response?.length && response[0];
+    const dataStore = response?.length && response[1];
+
+    setInitialized(true);
+    setUserData(loginData);
+    setStoreDataRedux(dataStore);
+
+    return { dataUser, dataStore };
+  };
+
   async function processResultLogin(loginData) {
     if (loginData && loginData.token) {
-      setUserData(loginData);
-      const infoByUser = getInfoByUser(loginData.user_id, loginData.token);
-      const storesByUser = getStoresByUser(loginData.user_id, loginData.token);
-      await Promise.all([infoByUser, storesByUser])
-        .then((response) => {
-          const dataUser = response[0];
-          const dataStore = response[1];
-          setInitialized(true);
-          setStoreDataRedux(dataStore);
+      setShowPreloader(true);
+      const { dataStore } = await initializeApp(loginData);
 
-          setMessage({
-            show: true,
-            type: 'success',
-            content: `${APP_TEXTS.WELCOME} ${dataUser.name} ${dataUser.lastname}`,
-          });
-
-          setShowPreloader(true);
-
-          setTimeout(() => {
-            goTo(dataStore);
-          }, 1000);
-        });
+      setShowPreloader(false);
+      goTo(dataStore);
     } else if ((loginData.code >= 0) && loginData.message) {
       setMessage({
         show: true,
@@ -311,20 +308,7 @@ const LoginView = () => {
                   >
                     <Grid
                       item
-                      xs={6}
-                    >
-                      <Button
-                        fullWidth
-                        size="large"
-                        className={classes.buttonText}
-                        startIcon={<Avatar size="small" className={classes.iconFacebook} src={FacebookIcon} />}
-                      >
-                        Iniciar con Facebook
-                      </Button>
-                    </Grid>
-                    <Grid
-                      item
-                      xs={6}
+                      xs={12}
                     >
                       <GoogleLogin
                         fullWidth

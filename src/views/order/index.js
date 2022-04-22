@@ -34,7 +34,7 @@ const Store = () => {
   return (
     <Page
       className={classes.root}
-      title="Tiendas"
+      title="Pedidos"
     >
       <Container maxWidth="lg">
         <Box
@@ -47,7 +47,7 @@ const Store = () => {
             variant="contained"
             onClick={goTo}
           >
-            Crear Tienda
+            Hola soy un botón
           </Button>
         </Box>
         <Grid>

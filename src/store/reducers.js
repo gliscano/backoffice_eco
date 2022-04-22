@@ -58,6 +58,7 @@ const userReducer = (state = initialState, { type, payload }) => {
         storeData,
       };
     }
+
     case SET_STORE_DATA: {
       const { userData } = state;
       const data = { ...state.storeData, ...payload };
@@ -66,6 +67,7 @@ const userReducer = (state = initialState, { type, payload }) => {
         storeData: data,
       };
     }
+
     case GET_STORE_DATA: {
       return state.storeData;
     }

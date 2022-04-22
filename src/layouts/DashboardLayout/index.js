@@ -65,11 +65,15 @@ const DashboardLayout = () => {
   const classes = useStyles();
   const { path } = useRouteMatch();
   const userData = useSelector((state) => state.userData);
+  const storeData = useSelector((state) => state.storeData);
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
     <div className={classes.root}>
-      <TopBar onMobileNavOpen={() => setMobileNavOpen(true)} />
+      <TopBar
+        storeName={storeData.name}
+        onMobileNavOpen={() => setMobileNavOpen(true)}
+      />
       <NavBar
         onMobileClose={() => setMobileNavOpen(false)}
         openMobile={isMobileNavOpen}

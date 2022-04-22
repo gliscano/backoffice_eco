@@ -34,6 +34,8 @@ import Page from 'src/components/Page';
 import AlertBar from 'src/components/AlertBar';
 // Services Api
 import StoreServiceApi from 'src/services/StoreServiceApi';
+import DropZone from 'src/components/dropZonePreview';
+import useFirebase from 'src/hooks/useFirebase';
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -53,6 +55,11 @@ const StoreEdit = ({ className, ...rest }) => {
   const dispatch = useDispatch();
   const storeServiceApi = new StoreServiceApi();
   const history = useHistory();
+  // hooks
+  const { uploadImage, getURLFile } = useFirebase();
+  // state
+  const [logo, setLogo] = useState([]);
+  // const [banner, setBanner] = useState([]);
   const [values, setValues] = useState({
     storeId: (storeData && storeData.store_id) || '',
     storeName: (storeData && storeData.name) || '',
@@ -94,10 +101,39 @@ const StoreEdit = ({ className, ...rest }) => {
     history.goBack();
   };
 
-  const processResult = (response) => {
+  const uploadLogoImage = () => {
+    if (!logo.length) { return false; }
+
+    const logoData = {
+      image: logo,
+      path: `${storeData.store_id}/logo/logo`,
+    };
+
+    const promiseLogo = uploadImage(logoData);
+    return promiseLogo;
+  };
+
+  // Handle callback of dropZone component
+  const handleCallbackLogo = (metaPhotos) => {
+    if (!metaPhotos || metaPhotos.length === 0) { return; }
+
+    setLogo(metaPhotos);
+  };
+
+  const processResult = async (response) => {
     const resp = response && response.stores;
 
     if (resp && resp.status === 'active') {
+      // upload image in Storage Cloud
+      const loadingPhotos = uploadLogoImage(resp);
+      if (loadingPhotos) {
+        const images = await Promise.all(loadingPhotos);
+        const urlPromises = images.map((img) => getURLFile(img.ref));
+        const urls = await Promise.all(urlPromises);
+        const urlPhotos = urls.join();
+        resp.urlImageLogo = urlPhotos;
+      }
+
       handleAlertBar(true);
 
       dispatch({
@@ -170,6 +206,26 @@ const StoreEdit = ({ className, ...rest }) => {
                 item
                 md={6}
                 xs={12}
+                style={{ display: 'flex' }}
+              >
+                <DropZone parentCallback={handleCallbackLogo} maxFiles={1} />
+              </Grid>
+              <Grid
+                item
+                md={6}
+                xs={12}
+                style={{ display: 'flex' }}
+              >
+                <Typography>Banner</Typography>
+                <UploadImage
+                  className={classes.avatar}
+                  dispatch={dispatch}
+                />
+              </Grid>
+              <Grid
+                item
+                md={12}
+                xs={12}
               >
                 <TextField
                   fullWidth
@@ -179,28 +235,6 @@ const StoreEdit = ({ className, ...rest }) => {
                   required
                   value={values.storeName}
                   variant="outlined"
-                  style={{ marginBottom: '3%' }}
-                />
-                <TextField
-                  fullWidth
-                  label="Slogan de tu Marca"
-                  name="slogan"
-                  onChange={handleChange}
-                  required
-                  value={values.slogan}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid
-                item
-                md={6}
-                xs={12}
-                style={{ display: 'flex' }}
-              >
-                <Typography>Logo</Typography>
-                <UploadImage
-                  className={classes.avatar}
-                  dispatch={dispatch}
                 />
               </Grid>
               <Grid

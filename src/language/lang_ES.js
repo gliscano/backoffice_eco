@@ -39,7 +39,7 @@ const APP_TEXTS = {
   ADD_BRANCH_STORE_BTN: 'AGREGAR SUCURSAL',
   SAVE_CHANGES_BTN: 'GUARDAR CAMBIOS',
   LOGIN_BTN: 'INICIAR SESIÓN',
-  FORGOT_PASSWORD_BTN: 'Olvide mi Contraseña',
+  FORGOT_PASSWORD_BTN: 'Olvide mi contraseña',
   RESET_PASSWORD: 'Resetear la contraseña',
   VALIDATE_TOKEN: 'Validar Token',
   GO_HOME: 'Ir al Inicio',

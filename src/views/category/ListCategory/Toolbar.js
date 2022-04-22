@@ -10,13 +10,10 @@ import {
   Button,
   Box,
   Grid,
-  InputAdornment,
   makeStyles,
-  TextField,
   Typography,
 } from '@material-ui/core';
 import AddBoxIcon from '@material-ui/icons/AddBox';
-import SearchIcon from '@material-ui/icons/Search';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 
@@ -74,28 +71,6 @@ const Toolbar = ({
         <Grid
           item
           xs={12}
-          md={4}
-        >
-          <TextField
-            fullWidth
-            size="small"
-            className={classes.searchField}
-            disabled
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              )
-            }}
-            placeholder={APP_TEXTS.SEARCH_CATEGORY}
-            variant="outlined"
-          />
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={8}
         >
           <Box className={classes.buttonsGroup}>
             <Box className={classes.boxPublications}>

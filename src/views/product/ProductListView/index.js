@@ -138,6 +138,7 @@ const ProductList = () => {
           // You may call listAll() recursively on them.
           console.log(folderRef);
         });
+
         res.items.forEach((itemRef) => {
           // All the items under listRef.
           console.log(itemRef);

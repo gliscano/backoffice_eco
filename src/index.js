@@ -5,8 +5,8 @@ import { ThemeProvider } from '@material-ui/core';
 import theme from 'src/theme';
 import GlobalStyles from 'src/components/GlobalStyles';
 import Routes from 'src/router/Routes';
-import store from './store/store';
 import firebaseApp from './firebase';
+import store from './store/store';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render((

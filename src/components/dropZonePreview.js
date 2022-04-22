@@ -95,8 +95,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function DropZone({ parentCallback, filesToPreview = [] }) {
-  const maxFiles = 4;
+function DropZone({ parentCallback, filesToPreview = [], maxFiles = 4 }) {
   const classes = useStyles();
   const [files, setFiles] = useState([]);
   const { getRootProps, getInputProps } = useDropzone({
@@ -122,8 +121,6 @@ function DropZone({ parentCallback, filesToPreview = [] }) {
   useEffect(() => {
     if (files.length > 0) {
       parentCallback(files);
-      // revoke the data uris to avoid memory leaks
-      files.forEach((file) => URL.revokeObjectURL(file.preview));
     }
   }, [files]);
 
@@ -140,6 +137,15 @@ function DropZone({ parentCallback, filesToPreview = [] }) {
       setFiles([...files, ...filesToAdd]);
     }
   }, [filesToPreview]);
+
+  useEffect(() => {
+    setFiles([]);
+
+    return () => {
+      // revoke the data uris to avoid memory leaks when the component was unmounted
+      files.forEach((file) => URL.revokeObjectURL(file.preview));
+    };
+  }, []);
 
   return (
     <Paper className={classes.paper} elevation={2}>
@@ -194,7 +200,7 @@ function DropZone({ parentCallback, filesToPreview = [] }) {
               </Avatar>
             </Box>
             <br />
-            Máximo 4 fotografías en formatos: PNG, JPG o JPEG
+            {`Máximo ${maxFiles}  fotografías en formatos: PNG, JPG o JPEG`}
           </Box>
         </div>
       )
@@ -205,7 +211,8 @@ function DropZone({ parentCallback, filesToPreview = [] }) {
 
 DropZone.propTypes = {
   parentCallback: PropTypes.func,
-  filesToPreview: PropTypes.array
+  filesToPreview: PropTypes.array,
+  maxFiles: PropTypes.number
 };
 
 export default DropZone;

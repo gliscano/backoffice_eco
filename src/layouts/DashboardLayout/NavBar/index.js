@@ -4,26 +4,22 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { CLEAR_USER_DATA } from 'src/store/action_types';
 import {
-  Link as RouterLink,
   useLocation
 } from 'react-router-dom';
 import PropTypes from 'prop-types';
 // Material IU and Icons
 import {
-  Avatar,
   Box,
   Divider,
   Drawer,
   Hidden,
   List,
-  Typography,
   makeStyles,
   Button,
   SvgIcon
 } from '@material-ui/core';
 import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 import BlurOnIcon from '@material-ui/icons/BlurOn';
-import ContactsIcon from '@material-ui/icons/Contacts';
 import InputIcon from '@material-ui/icons/Input';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import PlaylistAddIcon from '@material-ui/icons/PlaylistAdd';
@@ -48,11 +44,6 @@ const useStyles = makeStyles((theme) => ({
     height: 'calc(100% - 64px)',
     boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)'
   },
-  avatar: {
-    cursor: 'pointer',
-    width: 64,
-    height: 64
-  },
   boxItems: {
     paddingTop: theme.spacing(0),
     paddingLeft: theme.spacing(2),
@@ -67,16 +58,16 @@ const items = [
     show: true,
   },
   {
+    href: `${APP_CONFIG.ROUTE_ORDERS}`,
+    icon: ShoppingCartIcon,
+    title: 'Pedidos',
+    show: false,
+  },
+  {
     href: `${APP_CONFIG.ROUTE_STORE}`,
     icon: StoreMallDirectoryRoundedIcon,
     title: 'Tienda',
     show: true,
-  },
-  {
-    href: `${APP_CONFIG.ROUTE_PRODUCTS}`,
-    icon: LocalOfferIcon,
-    title: 'Productos',
-    show: false,
   },
   {
     href: `${APP_CONFIG.ROUTE_CATEGORY}`,
@@ -85,15 +76,9 @@ const items = [
     show: false,
   },
   {
-    href: `${APP_CONFIG.ROUTE_ORDERS}`,
-    icon: ShoppingCartIcon,
-    title: 'Pedidos',
-    show: false,
-  },
-  {
-    href: `${APP_CONFIG.ROUTE_CUSTOMERS}`,
-    icon: ContactsIcon,
-    title: 'Clientes',
+    href: `${APP_CONFIG.ROUTE_PRODUCTS}`,
+    icon: LocalOfferIcon,
+    title: 'Productos',
     show: false,
   },
   {
@@ -123,10 +108,6 @@ const NavBar = ({ onMobileClose, openMobile }) => {
   const dispatch = useDispatch();
   const loginServiceApi = new LoginServiceApi();
   const store = {
-    key: 'defaultImage',
-    avatar: storeData.urlImageLogo || storeData.defaultLogo,
-    name: storeData.name || '',
-    slogan: storeData.slogan || '',
     created: !!storeData.store_id,
   };
 
@@ -151,33 +132,6 @@ const NavBar = ({ onMobileClose, openMobile }) => {
       display="flex"
       flexDirection="column"
     >
-      <Box
-        alignItems="center"
-        display="flex"
-        flexDirection="column"
-        p={1}
-      >
-        <Avatar
-          className={classes.avatar}
-          component={RouterLink}
-          src={store.avatar}
-          to="/app/store"
-        />
-        <Typography
-          className={classes.name}
-          color="textPrimary"
-          variant="h5"
-        >
-          {store.name}
-        </Typography>
-        <Typography
-          color="textSecondary"
-          variant="body2"
-        >
-          {store.slogan}
-        </Typography>
-      </Box>
-      <Divider />
       <Box className={classes.boxItems}>
         <List>
           {items.map((item) => (
