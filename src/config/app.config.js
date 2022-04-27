@@ -37,7 +37,7 @@ const APP_CONFIG = {
   ROUTE_CREATE_STORE: '/app/createStore',
   ROUTE_CUSTOMERS: '/app/customers',
   ROUTE_DASHBOARD: '/app/dashboard',
-  ROUTE_EDIT_PRODUCT: '/products/edit',
+  ROUTE_EDIT_PRODUCT: '/app/editProduct',
   ROUTE_EDIT_STORE: '/app/editStore',
   ROUTE_FORGOT_PASSWORD: 'forgotPassword',
   ROUTE_GENERATE_QR: '/app/qr',

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import PropType from 'prop-types';
 // Redux and Router
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router';
 // Material IU
 import {
@@ -31,10 +31,10 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import APP_TEXTS from 'src/language/lang_ES';
 // Components
 import DropZone from 'src/components/dropZonePreview';
-import AlertBar from 'src/components/AlertBar';
 // services Api
 import CategoryServiceApi from 'src/services/CategoryServiceApi';
 import ProductServiceApi from 'src/services/ProductServiceApi';
+import { HIDE_ALERT, SET_ALERT_DATA } from 'src/store/action_types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -57,8 +57,11 @@ const EditProduct = () => {
   const classes = useStyles();
   const userData = useSelector((state) => state.userData);
   const storeData = useSelector((state) => state.storeData);
+  const appData = useSelector((state) => state.app);
   const history = useHistory();
+  const dispatch = useDispatch();
   const location = useLocation();
+
   const { product } = location.state;
   // State
   const [category, setCategory] = useState([]);
@@ -79,12 +82,6 @@ const EditProduct = () => {
   });
   const [photos, setPhotos] = useState([]);
   const [photosToPreview, setPhotosToPreview] = useState([]);
-  const [alert, setAlert] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-    callback: null,
-  });
 
   // communication instance
   const categoryServiceApi = new CategoryServiceApi();
@@ -178,21 +175,30 @@ const EditProduct = () => {
   };
 
   const closeAlert = () => {
-    setAlert({
-      ...alert,
-      open: false,
-      message: '',
-      callback: null,
+    dispatch({
+      type: HIDE_ALERT,
+      payload: ''
     });
   };
 
   const handleAlertBar = (status) => {
-    setAlert({
+    const { alert, ...rest } = appData;
+    const alertData = {
       ...alert,
       open: true,
       message: (status) ? APP_TEXTS.MESSAGE_UPDATE_PRODUCT : APP_TEXTS.UPDATE_PRODUCT_ERROR,
       severity: (status) ? 'success' : 'error',
       callback: closeAlert,
+    };
+
+    const data = {
+      ...rest,
+      alert: alertData
+    };
+
+    dispatch({
+      type: SET_ALERT_DATA,
+      payload: data
     });
   };
 
@@ -453,16 +459,6 @@ const EditProduct = () => {
             </Button>
           </Box>
         </Card>
-        {(alert && alert.open)
-        && (
-        <AlertBar
-          open={alert.open}
-          message={alert.message}
-          primaryButton={alert.button}
-          severity={alert.status}
-          parentCallback={alert.callback}
-        />
-        )}
       </Grid>
     </form>
   );

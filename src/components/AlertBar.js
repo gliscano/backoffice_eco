@@ -26,18 +26,14 @@ const AlertBar = ({
   open,
   message,
   severity,
-  parentCallback,
+  parentCallback = null,
 }) => {
   // hooks
   const classes = useStyles();
 
-  const onTrigger = (resp) => {
-    parentCallback(resp);
-    open = false;
-  };
-
   const handleResponse = (resp) => {
-    onTrigger(resp);
+    open = false;
+    parentCallback && parentCallback(resp);
   };
 
   return (

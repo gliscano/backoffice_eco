@@ -51,7 +51,7 @@ const Store = () => {
       <Container maxWidth="lg">
         <Box
           display="flex"
-          justifyContent="flex-start"
+          justifyContent="flex-end"
           className={classes.toolbar}
         >
           <Button

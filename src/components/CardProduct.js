@@ -80,7 +80,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ProductCard = ({
+const CardProduct = ({
   className,
   product,
   callbackEdit,
@@ -218,7 +218,7 @@ const ProductCard = ({
   );
 };
 
-ProductCard.propTypes = {
+CardProduct.propTypes = {
   className: PropTypes.string,
   product: PropTypes.object.isRequired,
   callbackEdit: PropTypes.func,
@@ -226,4 +226,4 @@ ProductCard.propTypes = {
   callbackDelete: PropTypes.func
 };
 
-export default ProductCard;
+export default CardProduct;

@@ -10,21 +10,9 @@ import clsx from 'clsx';
 // Material IU and Icon
 import {
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
-  CardMedia,
   Grid,
   makeStyles,
-  Typography,
-  Link,
 } from '@material-ui/core';
-import CreateIcon from '@material-ui/icons/Create';
-import InstagramIcon from '@material-ui/icons/Instagram';
-import WhatsAppIcon from '@material-ui/icons/WhatsApp';
-import DeleteRoundedIcon from '@material-ui/icons/DeleteRounded';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 // Services Api
@@ -35,32 +23,13 @@ import ConfirmationDialog from 'src/components/ConfirmationDialog';
 // Config
 import APP_CONFIG from 'src/config/app.config';
 import ThemeCustom from 'src/theme';
+import CardStore from 'src/components/CardStore';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     padding: theme.spacing(1),
     flexGrow: 1,
-  },
-  card: {
-    maxWidth: '100%',
-    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
-  },
-  cardHeader: {
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-  },
-  media: {
-    height: 0,
-    paddingTop: '56.25%', // 16:9
-    cursor: 'pointer',
-  },
-  actions: {
-    justifyContent: 'space-between',
-  },
-  description: {
-    padding: theme.spacing(1),
-    textAlign: 'justify',
   }
 }));
 
@@ -214,133 +183,34 @@ const ProfileStore = ({ className, ...rest }) => {
             sm={4}
             xs={12}
           >
-            <Card
-              key={item.store_id}
-              className={classes.card}
-            >
-              <CardHeader
-                title={item.name}
-                className={classes.cardHeader}
-              />
-              <CardMedia
-                className={classes.media}
-                image="/static/images/store/yourBanner.jpg"
-                title={storeData.title}
-                id={item.store_id}
-                onClick={(e) => handleEdit(e, true)}
-              />
-              <CardContent>
-                <Grid
-                  container
-                  xs={12}
-                >
-                  <Grid
-                    item
-                    md={6}
-                    xs={12}
-                    justifyContent="center"
-                  >
-                    <WhatsAppIcon />
-                    {' '}
-                    {item.phone}
-                  </Grid>
-                  <Grid
-                    item
-                    md={6}
-                    xs={12}
-                    justifyContent="center"
-                  >
-                    <InstagramIcon />
-                    {' '}
-                    <Link
-                      href={`https://www.instagram.com/${item.instagram}/`}
-                      color="inherit"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {item.instagram}
-                    </Link>
-                  </Grid>
-                </Grid>
-                <Grid
-                  className={classes.description}
-                >
-                  <Typography variant="caption" color="textSecondary">
-                    {item.description}
-                  </Typography>
-                </Grid>
-              </CardContent>
-              <CardActions className={classes.actions}>
-                { /* {item.store_id !== storeData.store_id && (
-                  <Button
-                    key="storeInactive"
-                    size="small"
-                    aria-label="tiendaInactiva"
-                    id={item.store_id}
-                    onClick={(e) => handleEdit(e, false)}
-                    startIcon={<CheckBoxOutlineBlankRoundedIcon />}
-                  >
-                    Seleccionar
-                  </Button>
-                )}
-                {item.store_id === storeData.store_id && (
-                  <Button
-                    key="storeActived"
-                    size="small"
-                    aria-label="tiendaActiva"
-                    id={item.store_id}
-                  >
-                    <CheckBoxRoundedIcon />
-                  </Button>
-                )} */ }
-                <Button
-                  key="delete"
-                  size="small"
-                  aria-label="Eliminar"
-                  id={item.store_id}
-                  onClick={(e) => handleDelete(e)}
-                  startIcon={<DeleteRoundedIcon />}
-                >
-                  {APP_TEXTS.DELETE_BTN}
-                </Button>
-                <Button
-                  key="edit"
-                  size="small"
-                  id={item.store_id}
-                  variant="outlined"
-                  color="secondary"
-                  aria-label={APP_TEXTS.EDIT_STORE_BTN}
-                  onClick={(e) => handleEdit(e, true)}
-                  startIcon={<CreateIcon />}
-                >
-                  {APP_TEXTS.EDIT_STORE_BTN}
-                </Button>
-              </CardActions>
-            </Card>
+            <CardStore
+              item={item}
+              storeData={storeData}
+              handleEdit={handleEdit}
+              handleDelete={handleDelete}
+            />
           </Grid>
         ))}
       </Grid>
-      {openDialogConfirm
-      && (
-      <ConfirmationDialog
-        open={openDialogConfirm}
-        title={APP_TEXTS.CONFIRMATION_TITLE}
-        message={APP_TEXTS.CONFIRM_DELETE_STORE}
-        primaryButton={APP_TEXTS.DELETE_BTN}
-        secondaryButton={APP_TEXTS.CANCEL_BTN}
-        primaryColor={ThemeCustom.palette.red.main}
-        parentCallback={deleteCallback}
-      />
+      {openDialogConfirm && (
+        <ConfirmationDialog
+          open={openDialogConfirm}
+          title={APP_TEXTS.CONFIRMATION_TITLE}
+          message={APP_TEXTS.CONFIRM_DELETE_STORE}
+          primaryButton={APP_TEXTS.DELETE_BTN}
+          secondaryButton={APP_TEXTS.CANCEL_BTN}
+          primaryColor={ThemeCustom.palette.red.main}
+          parentCallback={deleteCallback}
+        />
       )}
-      {(alert && alert.open)
-      && (
-      <AlertBar
-        open={alert.open}
-        message={alert.message}
-        primaryButton={alert.button}
-        severity={alert.status}
-        parentCallback={alert.callback}
-      />
+      {(alert && alert.open) && (
+        <AlertBar
+          open={alert.open}
+          message={alert.message}
+          primaryButton={alert.button}
+          severity={alert.status}
+          parentCallback={alert.callback}
+        />
       )}
     </Box>
   );

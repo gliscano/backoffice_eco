@@ -76,8 +76,10 @@ const APP_TEXTS = {
 
   // LOGIN, REGISTER, FORGOT PASSWORD AND VERIFY ACCOUNT PAGE
   EMAIL_NOT_MATCH: 'El correo electrónico no coincide',
-  FORGOT_PASSWORD_MESSAGE: 'Ingrese la dirección de correo electrónico asociada con su cuenta y le enviaremos un correo electrónico para restablecer su contraseña.',
+  EMAIL_ALRIGHT: 'El correo electrónico ya existe',
+  FORGOT_PASSWORD_MESSAGE: 'Ingrese el correo electrónico asociada con su cuenta para restablecer tú contraseña.',
   FORGOT_PASSWORD_TITLE: '¿Olvidaste tu contraseña?',
+  RESET_PASSWORD_MESSAGE: 'Hemos enviado por email el código de seguridad.',
   INVALID_EMAIL: 'Ingresa un correo electrónico válido',
   KEYWORD_RESEARCH: 'Las palabras claves (keywords) consiste en ... con el fin de ...',
   SIGN_UP_SUBTITLE: 'Crea una nueva cuenta y comienza a Gestionar tu Tienda!!!',

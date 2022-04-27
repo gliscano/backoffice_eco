@@ -21,12 +21,14 @@ import ThemeCustom from 'src/theme';
 // Firebase
 import storage from 'src/firebase';
 import { ref, listAll } from 'firebase/storage';
+// Config
+import APP_CONFIG from 'src/config/app.config';
 // Components
 import Page from 'src/components/Page';
 import AlertBar from 'src/components/AlertBar';
 import MainLoading from 'src/components/MainLoading';
 import ConfirmationDialog from 'src/components/ConfirmationDialog';
-import ProductCard from './ProductCard';
+import CardProduct from '../../../components/CardProduct';
 import Toolbar from './Toolbar';
 
 const useStyles = makeStyles((theme) => ({
@@ -103,7 +105,7 @@ const ProductList = () => {
 
   const callbackEdit = (prod) => {
     const to = {
-      pathname: 'products/edit',
+      pathname: APP_CONFIG.ROUTE_EDIT_PRODUCT,
       state: {
         product: prod,
       },
@@ -227,7 +229,7 @@ const ProductList = () => {
                 md={6}
                 xs={12}
               >
-                <ProductCard
+                <CardProduct
                   key={product.product_id}
                   className={classes.productCard}
                   product={product}

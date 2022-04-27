@@ -141,8 +141,9 @@ class LoginServiceApi {
     };
 
     this.clearDataLocalStorage();
-    const response = ServiceApi.request({ url, params, method });
-    return response;
+    return ServiceApi.request({ url, params, method })
+      .then((resp) => resp)
+      .catch((resp) => resp);
   }
 
   async verificationEmail(credentials) {

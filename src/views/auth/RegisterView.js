@@ -18,18 +18,25 @@ import {
 import APP_TEXTS from 'src/language/lang_ES';
 // components
 import Page from 'src/components/Page';
-import AlertBar from 'src/components/AlertBar';
 // services Api
 import UserServiceApi from 'src/services/UserServiceApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { HIDE_ALERT, SET_ALERT_DATA } from 'src/store/action_types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
-    height: '100%',
+    height: 'calc(100% - 64px)',
     position: 'absolute',
     margin: 'auto',
-    padding: '1% 0',
     backgroundColor: theme.palette.background.dark,
+  },
+  mainContainer: {
+    backgroundColor: theme.palette.background.white,
+    borderRadius: '5px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
+    boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
   },
 }));
 
@@ -54,16 +61,12 @@ const RegisterView = () => {
     policy: '',
     confirmed: false,
   });
-  const [alert, setAlert] = useState({
-    open: false,
-    message: '',
-    button: APP_TEXTS.ACCEPT_BTN,
-    severity: '',
-    callback: null,
-  });
+
   // hook
   const classes = useStyles(false);
+  const appData = useSelector((state) => state.app);
   const history = useHistory();
+  const dispatch = useDispatch();
   // communitation instance
   const userServiceApi = new UserServiceApi();
 
@@ -80,21 +83,30 @@ const RegisterView = () => {
   };
 
   const closeAlert = () => {
-    setAlert({
-      ...alert,
-      open: false,
-      message: '',
-      callback: null,
+    dispatch({
+      type: HIDE_ALERT,
+      payload: ''
     });
   };
 
   const handleAlertBar = ({ message, typeAlert }) => {
-    setAlert({
+    const { alert, ...rest } = appData;
+    const alertData = {
       ...alert,
       open: true,
       message,
       severity: typeAlert,
       callback: closeAlert,
+    };
+
+    const data = {
+      ...rest,
+      alert: alertData
+    };
+
+    dispatch({
+      type: SET_ALERT_DATA,
+      payload: data
     });
   };
 
@@ -154,7 +166,8 @@ const RegisterView = () => {
       goTo();
     } else {
       const paramsAlert = {
-        message: 'ERROR DE ALGO',
+        message: response?.data?.msg === 'email already taken'
+          ? APP_TEXTS.EMAIL_ALRIGHT : APP_TEXTS.ERR_UNKNOWN,
         typeAlert: 'error'
       };
 
@@ -187,9 +200,13 @@ const RegisterView = () => {
       <Box
         display="flex"
         flexDirection="column"
+        height="100%"
         justifyContent="center"
       >
-        <Container maxWidth="sm">
+        <Container
+          maxWidth="sm"
+          className={classes.mainContainer}
+        >
           <form>
             <Box mb={1}>
               <Typography
@@ -230,18 +247,6 @@ const RegisterView = () => {
             />
             <TextField
               fullWidth
-              error={errors.userName !== ''}
-              helperText={errors.userName}
-              label={APP_TEXTS.USERNAME}
-              margin="none"
-              name="userName"
-              onChange={handleChange}
-              value={values.userName}
-              variant="outlined"
-              style={{ marginBottom: '2%' }}
-            />
-            <TextField
-              fullWidth
               error={errors.email !== ''}
               helperText={errors.email}
               label={APP_TEXTS.MAIL}
@@ -268,6 +273,18 @@ const RegisterView = () => {
             />
             <TextField
               fullWidth
+              error={errors.userName !== ''}
+              helperText={errors.userName}
+              label={APP_TEXTS.USERNAME}
+              margin="none"
+              name="userName"
+              onChange={handleChange}
+              value={values.userName}
+              variant="outlined"
+              style={{ width: '49%', marginRight: '1%', marginBottom: '1%' }}
+            />
+            <TextField
+              fullWidth
               error={errors.password !== ''}
               helperText={errors.password}
               label={APP_TEXTS.PASSWORD}
@@ -277,7 +294,7 @@ const RegisterView = () => {
               type="password"
               value={values.password}
               variant="outlined"
-              style={{ marginBottom: '1%' }}
+              style={{ width: '49%', marginBottom: '2%' }}
             />
             <Box
               alignItems="center"
@@ -311,7 +328,7 @@ const RegisterView = () => {
                 )}
               </Typography>
             </Box>
-            <Box my={1}>
+            <Box>
               <Button
                 color="primary"
                 fullWidth
@@ -326,6 +343,7 @@ const RegisterView = () => {
             <Typography
               color="textSecondary"
               variant="body1"
+              style={{ marginTop: '2%' }}
             >
               {APP_TEXTS.ALREADY_REGISTERED}
               {' '}
@@ -340,16 +358,6 @@ const RegisterView = () => {
           </form>
         </Container>
       </Box>
-      {(alert && alert.open)
-      && (
-      <AlertBar
-        open={alert.open}
-        message={alert.message}
-        primaryButton={alert.button}
-        severity={alert.severity}
-        parentCallback={alert.callback}
-      />
-      )}
     </Page>
   );
 };

@@ -1,16 +1,20 @@
 import APP_TEXTS from 'src/language/lang_ES';
 
 const APP_UTILS = {
-  getError: (responseApi) => {
+  getError: async (responseApi) => {
     const error = {
-      type: 'error',
       code: responseApi.status || 0,
-      statusText: responseApi.statusText,
       message: APP_TEXTS.ERR_UNKNOWN,
+      statusText: responseApi.statusText,
+      type: 'error',
     };
 
     switch (error.code) {
       case 401:
+        error.message = APP_TEXTS.ERR_UN_AUTHORIZED;
+        break;
+
+      case 404:
         error.message = APP_TEXTS.ERR_UN_AUTHORIZED;
         break;
 

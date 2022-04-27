@@ -1,5 +1,8 @@
 /* eslint-disable prefer-object-spread */
+import APP_TEXTS from 'src/language/lang_ES';
 import {
+  SET_ALERT_DATA,
+  HIDE_ALERT,
   SET_USER_DATA,
   CLEAR_USER_DATA,
   SET_STORE_DATA,
@@ -8,6 +11,15 @@ import {
 } from './action_types';
 
 const initialState = {
+  app: {
+    alert: {
+      open: false,
+      message: '',
+      button: APP_TEXTS.ACCEPT_BTN,
+      severity: 'info',
+      callback: null,
+    }
+  },
   userData: {
     email: '',
     lastname: '',
@@ -42,29 +54,53 @@ const initialState = {
 
 const userReducer = (state = initialState, { type, payload }) => {
   switch (type) {
+    case SET_ALERT_DATA: {
+      const { userData, storeData } = state;
+      const mergeData = { ...state.app, ...payload };
+      console.log('REDUCER APP ALERT', mergeData);
+      return {
+        app: mergeData,
+        userData,
+        storeData,
+      };
+    }
+    case HIDE_ALERT: {
+      const { app, userData, storeData } = state;
+      const clearAlertData = { ...app.alert, ...initialState.app.alert };
+      app.alert = { ...clearAlertData };
+      console.log('REDUCER HIDE ALERT', app);
+      return {
+        app,
+        userData,
+        storeData,
+      };
+    }
     case SET_USER_DATA: {
-      const { storeData } = state;
+      const { app, storeData } = state;
       const mergeData = { ...state.userData, ...payload };
       return {
         userData: mergeData,
         storeData,
+        app,
       };
     }
     case CLEAR_USER_DATA: {
-      const { storeData } = state;
+      const { app, storeData } = state;
       const mergeData = { ...state.userData, ...initialState.userData };
       return {
         userData: mergeData,
         storeData,
+        app,
       };
     }
 
     case SET_STORE_DATA: {
-      const { userData } = state;
+      const { app, userData } = state;
       const data = { ...state.storeData, ...payload };
       return {
-        userData,
         storeData: data,
+        userData,
+        app,
       };
     }
 
@@ -72,11 +108,12 @@ const userReducer = (state = initialState, { type, payload }) => {
       return state.storeData;
     }
     case CLEAR_STORE_DATA: {
-      const { userData } = state;
+      const { app, userData } = state;
       const data = { ...state.storeData, ...initialState.storeData };
       return {
-        userData,
         storeData: data,
+        userData,
+        app,
       };
     }
     default:

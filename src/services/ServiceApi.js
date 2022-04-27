@@ -20,7 +20,7 @@ const ServiceApi = {
         return Promise.resolve(response);
       }
 
-      return Promise.reject(response);
+      return Promise.reject(response.json());
     } catch (error) {
       console.log(error);
       return error;

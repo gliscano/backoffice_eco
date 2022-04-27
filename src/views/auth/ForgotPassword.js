@@ -10,14 +10,9 @@ import {
   Box,
   Button,
   Container,
-  // Grid,
-  // Link,
   TextField,
   Typography,
   makeStyles,
-  // Avatar,
-  // Collapse,
-  // IconButton,
 } from '@material-ui/core';
 // components
 import Page from 'src/components/Page';
@@ -25,30 +20,26 @@ import Page from 'src/components/Page';
 import APP_TEXTS from 'src/language/lang_ES';
 // Services Api
 import LoginServiceApi from 'src/services/LoginServiceApi';
-// Constants of Configuration
-// import APP_CONFIG from 'src/config/app.config';
+import { useDispatch, useSelector } from 'react-redux';
+import { HIDE_ALERT, SET_ALERT_DATA } from 'src/store/action_types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.background.dark,
-    height: '100%',
+    height: 'calc(100% - 64px)',
+    margin: 'auto',
     paddingBottom: theme.spacing(3),
+    overflow: 'hidden',
     paddingTop: theme.spacing(3),
+    position: 'absolute',
+    width: '100%',
   },
   mainContainer: {
-    // border: 'solid 1px #D1D4D9',
+    backgroundColor: theme.palette.background.white,
     borderRadius: '5px',
-    paddingTop: '15px',
-    paddingBottom: '15px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
     boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
-  },
-  iconGoogle: {
-    width: theme.spacing(3),
-    height: theme.spacing(3),
-  },
-  iconFacebook: {
-    width: theme.spacing(3.5),
-    height: theme.spacing(3.5),
   },
   buttonText: {
     textTransform: 'none',
@@ -56,6 +47,9 @@ const useStyles = makeStyles((theme) => ({
   alert: {
     boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
   },
+  passMessage: {
+    paddingTop: '8px'
+  }
 }));
 
 const ResetPassword = () => {
@@ -64,6 +58,8 @@ const ResetPassword = () => {
   // hooks
   const classes = useStyles();
   const history = useHistory();
+  const appData = useSelector((state) => state.app);
+  const dispatch = useDispatch();
   // communication instances
   const loginServiceApi = new LoginServiceApi();
 
@@ -72,13 +68,50 @@ const ResetPassword = () => {
     // history.push(path);
   };
 
+  const closeAlert = () => {
+    dispatch({
+      type: HIDE_ALERT,
+      payload: ''
+    });
+  };
+
+  const handleAlertBar = (status, message) => {
+    const { alert, ...rest } = appData;
+    const alertData = {
+      ...alert,
+      open: true,
+      message,
+      severity: (status) ? 'success' : 'error',
+      callback: closeAlert,
+    };
+
+    const data = {
+      ...rest,
+      alert: alertData
+    };
+
+    dispatch({
+      type: SET_ALERT_DATA,
+      payload: data
+    });
+  };
+
   const goBack = () => {
     history.goBack();
   };
 
-  async function processResultLogin(response) {
-    // TO DO
-    console.log(response);
+  function processResult(response) {
+    let status = true;
+    let message = APP_TEXTS.RESET_PASSWORD_MESSAGE;
+
+    console.log('response', response);
+
+    if (typeof response.data === 'string') {
+      status = false;
+      message = (response.data === 'invalid email') ? APP_TEXTS.INVALID_EMAIL : APP_TEXTS.ERR_UNKNOWN;
+    }
+
+    handleAlertBar(status, message);
     goTo();
   }
 
@@ -92,11 +125,11 @@ const ResetPassword = () => {
     loginServiceApi.forgetPasswordRequest(credentials)
       .then((response) => {
         if (response) {
-          processResultLogin(response);
+          processResult(response);
         }
       })
       .catch((error) => {
-        processResultLogin(error);
+        processResult(error);
       });
   }
 
@@ -141,6 +174,7 @@ const ResetPassword = () => {
                     color="textSecondary"
                     gutterBottom
                     variant="body2"
+                    className={classes.passMessage}
                   >
                     {APP_TEXTS.FORGOT_PASSWORD_MESSAGE}
                   </Typography>

@@ -48,10 +48,10 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.dark,
   },
   mainContainer: {
-    // border: 'solid 1px #D1D4D9',
+    backgroundColor: theme.palette.background.white,
     borderRadius: '5px',
-    paddingTop: '15px',
-    paddingBottom: '15px',
+    paddingTop: '16px',
+    paddingBottom: '16px',
     boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',
   },
   iconGoogle: {
