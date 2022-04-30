@@ -10,10 +10,13 @@ import { Alert } from '@material-ui/lab';
 
 const useStyles = makeStyles(() => ({
   root: {
-    maxWidth: '100%'
+    maxWidth: '100%',
+    display: 'flex',
   },
   snackbar: {
-    width: '50%',
+    display: 'flex',
+    margin: 'auto',
+    width: '90%',
   },
   alert: {
     width: '100%',

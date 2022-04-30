@@ -3,11 +3,17 @@ import storage from 'src/firebase';
 
 const useFirebase = () => {
   const uploadImage = (data) => {
-    const { image, path } = data;
+    if (!data?.length) {
+      return false;
+    }
 
-    const promises = image.map((photo) => {
+    console.log('Imagen Data', data);
+
+    const promises = data.map((photo) => {
+      const { image, path } = photo;
       const fileRef = ref(storage, path);
-      return uploadBytes(fileRef, photo);
+
+      return uploadBytes(fileRef, image);
     });
 
     return promises;

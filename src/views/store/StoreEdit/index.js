@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Container,
   Grid,
   makeStyles
 } from '@material-ui/core';
@@ -27,21 +26,16 @@ const Store = () => {
       className={classes.root}
       title="Tiendas"
     >
-      <Container maxWidth="lg">
+      <Grid container>
         <Grid
-          container
-          spacing={3}
+          item
+          lg={8}
+          md={8}
+          xs={12}
         >
-          <Grid
-            item
-            lg={8}
-            md={8}
-            xs={12}
-          >
-            <StoreEdit />
-          </Grid>
+          <StoreEdit />
         </Grid>
-      </Container>
+      </Grid>
     </Page>
   );
 };

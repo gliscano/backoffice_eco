@@ -33,15 +33,17 @@ import APP_TEXTS from 'src/language/lang_ES';
 import StoreServiceApi from 'src/services/StoreServiceApi';
 // components
 import Page from 'src/components/Page';
-import UploadImage from 'src/components/UploadImage';
 import AlertBar from 'src/components/AlertBar';
 // variables of configuration
 import APP_CONFIG from 'src/config/app.config';
 import generalCategories from 'src/config/generalCategories';
+import DropZone from 'src/components/dropZonePreview';
+// Hooks
+import useFirebase from 'src/hooks/useFirebase';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: theme.spacing(2)
+    display: 'flex',
   },
   avatar: {
     height: 80,
@@ -49,7 +51,12 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     marginLeft: theme.spacing(1)
-  }
+  },
+  dropZoneContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
+  },
 }));
 
 const StoreCreate = ({ className, ...rest }) => {
@@ -58,20 +65,22 @@ const StoreCreate = ({ className, ...rest }) => {
   const userData = useSelector((state) => state.userData);
   const dispatch = useDispatch();
   const history = useHistory();
+  const { uploadImage, getURLFile } = useFirebase();
   // states
   const [values, setValues] = useState({
-    storeName: '',
-    slogan: '',
-    description: '',
+    bannerUrl: '',
     category: '',
-    phone: '',
+    description: '',
     facebook: '',
     instagram: '',
     keywords: '#tiendaonline',
+    logoUrl: '',
+    phone: '',
+    slogan: '',
+    storeName: '',
   });
   const [errors, setErrors] = useState({
     storeName: '',
-    category: '',
     phone: '',
   });
   const [alert, setAlert] = useState({
@@ -81,6 +90,8 @@ const StoreCreate = ({ className, ...rest }) => {
     severity: '',
     callback: null,
   });
+  const [logo, setLogo] = useState([]);
+  const [banner, setBanner] = useState([]);
   // services api
   const storeServiceApi = new StoreServiceApi();
   // constants
@@ -122,15 +133,89 @@ const StoreCreate = ({ className, ...rest }) => {
     history.push(path);
   };
 
-  const processResult = (response) => {
+  const uploadLogoImage = (store) => {
+    const imagenToLoad = [];
+
+    if (logo.length) {
+      const logoImage = logo.pop();
+      const extension = logoImage?.type?.replace('image/', '.');
+      const logoData = {
+        image: logoImage,
+        path: `${store?.store_id}/store/logo${extension}`,
+      };
+
+      imagenToLoad.push(logoData);
+    }
+
+    if (banner.length) {
+      const bannerImage = banner.pop();
+      const extension = bannerImage?.type?.replace('image/', '.');
+      const bannerData = {
+        image: bannerImage,
+        path: `${store?.store_id}/store/banner${extension}`,
+      };
+
+      imagenToLoad.push(bannerData);
+    }
+
+    const promises = uploadImage(imagenToLoad);
+    return promises;
+  };
+
+  // Handle callback of dropZone component
+  const handleCallbackLogo = (metaPhotos) => {
+    if (!metaPhotos || metaPhotos.length === 0) { return; }
+
+    setLogo(metaPhotos);
+  };
+
+  const handleCallbackBanner = (metaPhotos) => {
+    if (!metaPhotos || metaPhotos.length === 0) { return; }
+
+    setBanner(metaPhotos);
+  };
+
+  const updateStore = async (dataStore) => {
+    const update = true;
+    dataStore.token = userData?.token;
+    dataStore.userId = userData?.user_id;
+    dataStore.storeId = dataStore?.store_id;
+
+    const response = await storeServiceApi.requestPost(dataStore, update)
+      .then((result) => result);
+
+    return response;
+  };
+
+  const processResult = async (response) => {
     const resp = response && response.stores;
     const storeCreated = (resp && resp.status === 'active') || false;
+
     const paramsAlert = {
       message: (storeCreated) ? APP_TEXTS.MESSAGE_CREATE_STORE : APP_TEXTS.CREATE_STORE_ERROR,
       typeAlert: (storeCreated) ? 'success' : 'error'
     };
 
     if (storeCreated) {
+      // upload image in Storage Cloud
+      const loadingPhotos = uploadLogoImage(resp);
+      if (loadingPhotos) {
+        const images = await Promise.all(loadingPhotos);
+        const urlPromises = images.map((img) => getURLFile(img.ref));
+        const urls = await Promise.all(urlPromises);
+
+        urls.forEach((url) => {
+          if (url.indexOf('store%2Flogo.') >= 0) {
+            resp.logoUrl = url;
+          } else if (url.indexOf('store%2Fbanner.') >= 0) {
+            resp.bannerUrl = url;
+          }
+        });
+        console.log('resp', resp);
+
+        await updateStore(resp);
+      }
+
       dispatch({
         type: SET_STORE_DATA,
         payload: resp
@@ -178,14 +263,14 @@ const StoreCreate = ({ className, ...rest }) => {
     let confirmedError = false;
 
     const helperText = {
-      storeName: APP_TEXTS.REQUIRED_NAME_STORE,
       phone: APP_TEXTS.REQUIRED_PHONE_NUMBER,
-      category: APP_TEXTS.REQUIRED_CATEGORY_STORE,
+      storeName: APP_TEXTS.REQUIRED_NAME_STORE,
     };
 
     Object.entries(values).forEach(([name, value]) => {
       let text = helperText[name] || '';
       if (value === '' && text !== '') {
+        console.log(name, value, text);
         confirmedError = true;
       } else {
         text = '';
@@ -206,15 +291,17 @@ const StoreCreate = ({ className, ...rest }) => {
     }
 
     const dataStore = {
-      name: values.storeName,
-      title: values.slogan || values.storeName,
-      description: values.description,
-      phone: values.phone,
+      bannerUrl: values.bannerUrl,
+      description: values.description || APP_TEXTS.DESCRIPTION_DEFAULT,
       facebook: values.facebook || ' ',
       instagram: values.instagram || ' ',
       keywords: values.keywords,
-      userId: userData.user_id,
+      logoUrl: values.logoUrl,
+      name: values.storeName,
+      phone: values.phone,
+      title: values.slogan || values.storeName,
       token: userData.token,
+      userId: userData.user_id,
     };
 
     storeServiceApi.requestPost(dataStore)
@@ -224,7 +311,7 @@ const StoreCreate = ({ className, ...rest }) => {
   return (
     <Page
       className={classes.root}
-      title="Tienda"
+      title="Crear Tienda"
     >
       <form
         autoComplete="off"
@@ -237,7 +324,7 @@ const StoreCreate = ({ className, ...rest }) => {
           md={6}
           xs={12}
         >
-          <CardHeader title="Tienda" />
+          <CardHeader title="Crear Tienda" />
           <Divider />
           <CardContent>
             <Grid
@@ -248,38 +335,35 @@ const StoreCreate = ({ className, ...rest }) => {
                 item
                 md={6}
                 xs={12}
+                className={classes.dropZoneContainer}
               >
-                <TextField
-                  fullWidth
-                  name="storeName"
-                  required
-                  label={APP_TEXTS.NAME_STORE}
-                  error={errors.storeName !== ''}
-                  helperText={errors.storeName}
-                  value={values.storeName}
-                  onChange={handleChange}
-                  variant="outlined"
-                  style={{ marginBottom: '3%' }}
-                />
-                <TextField
-                  fullWidth
-                  name="slogan"
-                  label={APP_TEXTS.SLOGAN_STORE}
-                  onChange={handleChange}
-                  value={values.slogan}
-                  variant="outlined"
-                />
+                <Typography>{APP_TEXTS.LOGO_STORE}</Typography>
+                <DropZone parentCallback={handleCallbackLogo} maxFiles={1} />
               </Grid>
               <Grid
                 item
                 md={6}
                 xs={12}
-                style={{ display: 'flex' }}
+                className={classes.dropZoneContainer}
               >
-                <Typography>Logo</Typography>
-                <UploadImage
-                  className={classes.avatar}
-                  dispatch={dispatch}
+                <Typography>{APP_TEXTS.BANNER_STORE}</Typography>
+                <DropZone parentCallback={handleCallbackBanner} maxFiles={1} />
+              </Grid>
+              <Grid
+                item
+                md={12}
+                xs={12}
+              >
+                <TextField
+                  fullWidth
+                  label="Nombre de la Marca"
+                  name="storeName"
+                  error={errors.storeName !== ''}
+                  helperText={errors.storeName}
+                  onChange={handleChange}
+                  required
+                  value={values.storeName}
+                  variant="outlined"
                 />
               </Grid>
               <Grid
@@ -308,8 +392,6 @@ const StoreCreate = ({ className, ...rest }) => {
                   id="grouped-Category"
                   name="category"
                   size="small"
-                  error={errors.category !== ''}
-                  helperText={errors.category}
                   options={
                     options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))
                   }
@@ -328,7 +410,7 @@ const StoreCreate = ({ className, ...rest }) => {
                   fullWidth
                   name="facebook"
                   label="Facebook"
-                  helperText="@nombre_plataforma"
+                  helperText={`www.facebook.com/${values.facebook}`}
                   onChange={handleChange}
                   value={values.facebook}
                   variant="outlined"
@@ -350,7 +432,7 @@ const StoreCreate = ({ className, ...rest }) => {
                   fullWidth
                   name="instagram"
                   label="Instagram"
-                  helperText="@nombre_plataforma/"
+                  helperText={`www.instagram.com/${values.instagram}`}
                   onChange={handleChange}
                   value={values.instagram}
                   variant="outlined"

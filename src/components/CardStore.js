@@ -97,23 +97,25 @@ const CardStore = ({
             {' '}
             {item.phone}
           </Grid>
-          <Grid
-            item
-            md={6}
-            xs={12}
-            justifyContent="center"
-          >
-            <InstagramIcon />
-            {' '}
-            <Link
-              href={`https://www.instagram.com/${item.instagram}/`}
-              color="inherit"
-              target="_blank"
-              rel="noopener"
+          {item.instagram && (
+            <Grid
+              item
+              md={6}
+              xs={12}
+              justifyContent="center"
             >
-              {item.instagram}
-            </Link>
-          </Grid>
+              <InstagramIcon />
+              {' '}
+              <Link
+                href={`https://www.instagram.com/${item.instagram}/`}
+                color="inherit"
+                target="_blank"
+                rel="noopener"
+              >
+                {item.instagram}
+              </Link>
+            </Grid>
+          )}
         </Grid>
         <Grid
           className={classes.description}

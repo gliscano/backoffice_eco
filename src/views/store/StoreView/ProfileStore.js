@@ -180,7 +180,8 @@ const ProfileStore = ({ className, ...rest }) => {
           <Grid
             item
             key={item.store_id || item.key}
-            sm={4}
+            md={4}
+            sm={6}
             xs={12}
           >
             <CardStore

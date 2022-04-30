@@ -41,15 +41,20 @@ import APP_CONFIG from 'src/config/app.config';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: '100%',
-    height: 'calc(100% - 64px)',
-    position: 'absolute',
-    margin: 'auto',
     backgroundColor: theme.palette.background.dark,
+    display: 'flex',
+    justifyContent: 'center',
+    height: 'calc(100% - 64px)',
+    margin: 'auto',
+    overflow: 'hidden',
+    paddingBottom: theme.spacing(3),
+    paddingTop: theme.spacing(3),
+    width: '100%',
   },
   mainContainer: {
     backgroundColor: theme.palette.background.white,
     borderRadius: '5px',
+    marginRight: '8px',
     paddingTop: '16px',
     paddingBottom: '16px',
     boxShadow: '0px 1px 8px -3px rgba(69,90,100,0.8)',

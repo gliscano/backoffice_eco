@@ -31,14 +31,16 @@ class StoreServiceApi {
     }
 
     const data = JSON.stringify({
-      name: params.name,
-      user_id: params.userId,
-      description: params.description,
-      keywords: params.keywords,
-      title: params.title,
-      phone: params.phone,
-      facebook: params.facebook,
-      instagram: params.instagram,
+      name: params?.name,
+      user_id: params?.userId,
+      description: params?.description,
+      keywords: params?.keywords,
+      logo_url: params?.logoUrl || '',
+      banner_url: params?.bannerUrl || '',
+      title: params?.title,
+      phone: params?.phone,
+      facebook: params?.facebook,
+      instagram: params?.instagram,
     });
 
     let headers = {};

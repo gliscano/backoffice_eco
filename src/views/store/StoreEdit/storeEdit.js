@@ -29,12 +29,12 @@ import HelpIcon from '@material-ui/icons/Help';
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 // Components
-import UploadImage from 'src/components/UploadImage';
 import Page from 'src/components/Page';
 import AlertBar from 'src/components/AlertBar';
 // Services Api
 import StoreServiceApi from 'src/services/StoreServiceApi';
 import DropZone from 'src/components/dropZonePreview';
+// Hooks
 import useFirebase from 'src/hooks/useFirebase';
 
 const useStyles = makeStyles((theme) => ({
@@ -49,17 +49,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const StoreEdit = ({ className, ...rest }) => {
+  // hooks
   const classes = useStyles();
   const userData = useSelector((state) => state.userData);
   const storeData = useSelector((state) => state.storeData);
   const dispatch = useDispatch();
-  const storeServiceApi = new StoreServiceApi();
   const history = useHistory();
-  // hooks
   const { uploadImage, getURLFile } = useFirebase();
+  const storeServiceApi = new StoreServiceApi();
   // state
   const [logo, setLogo] = useState([]);
-  // const [banner, setBanner] = useState([]);
+  const [banner, setBanner] = useState([]);
   const [values, setValues] = useState({
     storeId: (storeData && storeData.store_id) || '',
     storeName: (storeData && storeData.name) || '',
@@ -101,16 +101,33 @@ const StoreEdit = ({ className, ...rest }) => {
     history.goBack();
   };
 
-  const uploadLogoImage = () => {
-    if (!logo.length) { return false; }
+  const uploadLogoImage = (response) => {
+    const imagenToLoad = [];
 
-    const logoData = {
-      image: logo,
-      path: `${storeData.store_id}/logo/logo`,
-    };
+    if (logo.length) {
+      const logoImage = logo.pop();
+      const extension = logoImage?.type?.replace('image/', '.');
+      const logoData = {
+        image: logoImage,
+        path: `${response?.store_id}/store/logo${extension}`,
+      };
 
-    const promiseLogo = uploadImage(logoData);
-    return promiseLogo;
+      imagenToLoad.push(logoData);
+    }
+
+    if (banner.length) {
+      const bannerImage = banner.pop();
+      const extension = bannerImage?.type?.replace('image/', '.');
+      const bannerData = {
+        image: bannerImage,
+        path: `${response?.store_id}/store/banner${extension}`,
+      };
+
+      imagenToLoad.push(bannerData);
+    }
+
+    const promises = uploadImage(imagenToLoad);
+    return promises;
   };
 
   // Handle callback of dropZone component
@@ -118,6 +135,12 @@ const StoreEdit = ({ className, ...rest }) => {
     if (!metaPhotos || metaPhotos.length === 0) { return; }
 
     setLogo(metaPhotos);
+  };
+
+  const handleCallbackBanner = (metaPhotos) => {
+    if (!metaPhotos || metaPhotos.length === 0) { return; }
+
+    setBanner(metaPhotos);
   };
 
   const processResult = async (response) => {
@@ -206,21 +229,19 @@ const StoreEdit = ({ className, ...rest }) => {
                 item
                 md={6}
                 xs={12}
-                style={{ display: 'flex' }}
+                className={classes.dropZoneContainer}
               >
+                <Typography>{APP_TEXTS.LOGO_STORE}</Typography>
                 <DropZone parentCallback={handleCallbackLogo} maxFiles={1} />
               </Grid>
               <Grid
                 item
                 md={6}
                 xs={12}
-                style={{ display: 'flex' }}
+                className={classes.dropZoneContainer}
               >
-                <Typography>Banner</Typography>
-                <UploadImage
-                  className={classes.avatar}
-                  dispatch={dispatch}
-                />
+                <Typography>{APP_TEXTS.BANNER_STORE}</Typography>
+                <DropZone parentCallback={handleCallbackBanner} maxFiles={1} />
               </Grid>
               <Grid
                 item

@@ -97,11 +97,14 @@ const APP_TEXTS = {
   MESSAGE_UPDATE_STORE: 'Tienda actualizada!',
   MESSAGE_DELETE_STORE: 'La tienda ha sido eliminada!',
   CONFIRM_DELETE_STORE: 'Desea Eliminar la tienda y todo su contenido?',
+  LOGO_STORE: 'Logo de tu marca',
+  BANNER_STORE: 'Banner o imágen superior',
   NAME_STORE: 'Nombre de la Marca',
   SLOGAN_STORE: 'Slogan de tu Marca',
   DESCRIPTION_STORE: 'Describe lo increíble que es tu marca',
   PHONE_STORE: 'Número de Teléfono',
   KEYWORDS_STORE: 'Palabras Claves SEO',
+  DESCRIPTION_DEFAULT: 'Tienda creada con NOMBRE_PLATAFORMA',
 
   // PRODUCT PAGE
   PRICE_LABEL: 'Precio',
