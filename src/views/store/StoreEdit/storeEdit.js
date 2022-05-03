@@ -1,5 +1,5 @@
 // React
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import PropTypes from 'prop-types';
 // Redux and Router
@@ -58,18 +58,22 @@ const StoreEdit = ({ className, ...rest }) => {
   const { uploadImage, getURLFile } = useFirebase();
   const storeServiceApi = new StoreServiceApi();
   // state
+  const [values, setValues] = useState({
+    bannerUrl: (storeData?.bannerUrl) || '',
+    description: (storeData?.description) || '',
+    facebook: (storeData?.facebook) || '',
+    instagram: (storeData?.instagram) || '',
+    keywords: (storeData?.keywords) || '',
+    logoUrl: (storeData?.logoUrl) || '',
+    phone: (storeData?.phone) || '',
+    slogan: (storeData?.title) || '',
+    storeId: (storeData?.store_id) || '',
+    storeName: (storeData?.name) || '',
+  });
   const [logo, setLogo] = useState([]);
   const [banner, setBanner] = useState([]);
-  const [values, setValues] = useState({
-    storeId: (storeData && storeData.store_id) || '',
-    storeName: (storeData && storeData.name) || '',
-    slogan: (storeData && storeData.title) || '',
-    description: (storeData && storeData.description) || '',
-    phone: (storeData && storeData.phone) || '',
-    facebook: (storeData && storeData.facebook) || '',
-    instagram: (storeData && storeData.instagram) || '',
-    keywords: (storeData && storeData.keywords) || '',
-  });
+  const [previewLogo, setPreviewLogo] = useState([]);
+  const [previewBanner, setPreviewBanner] = useState([]);
   const [alert, setAlert] = useState({
     open: false,
     message: '',
@@ -85,6 +89,16 @@ const StoreEdit = ({ className, ...rest }) => {
       message: '',
       callback: null,
     });
+  };
+
+  const setPreviewPhotos = () => {
+    if (values.logoUrl !== '') {
+      setPreviewLogo([values.logoUrl]);
+    }
+
+    if (values.bannerUrl !== '') {
+      setPreviewBanner([values.bannerUrl]);
+    }
   };
 
   const handleAlertBar = (status) => {
@@ -153,8 +167,14 @@ const StoreEdit = ({ className, ...rest }) => {
         const images = await Promise.all(loadingPhotos);
         const urlPromises = images.map((img) => getURLFile(img.ref));
         const urls = await Promise.all(urlPromises);
-        const urlPhotos = urls.join();
-        resp.urlImageLogo = urlPhotos;
+
+        urls.forEach((url) => {
+          if (url.indexOf('store%2Flogo.') >= 0) {
+            resp.logoUrl = url;
+          } else if (url.indexOf('store%2Fbanner.') >= 0) {
+            resp.bannerUrl = url;
+          }
+        });
       }
 
       handleAlertBar(true);
@@ -206,6 +226,10 @@ const StoreEdit = ({ className, ...rest }) => {
       });
   }
 
+  useEffect(() => {
+    setPreviewPhotos();
+  }, []);
+
   return (
     <Page
       className={classes.root}
@@ -232,7 +256,11 @@ const StoreEdit = ({ className, ...rest }) => {
                 className={classes.dropZoneContainer}
               >
                 <Typography>{APP_TEXTS.LOGO_STORE}</Typography>
-                <DropZone parentCallback={handleCallbackLogo} maxFiles={1} />
+                <DropZone
+                  filesToPreview={previewLogo}
+                  maxFiles={1}
+                  parentCallback={handleCallbackLogo}
+                />
               </Grid>
               <Grid
                 item
@@ -241,7 +269,11 @@ const StoreEdit = ({ className, ...rest }) => {
                 className={classes.dropZoneContainer}
               >
                 <Typography>{APP_TEXTS.BANNER_STORE}</Typography>
-                <DropZone parentCallback={handleCallbackBanner} maxFiles={1} />
+                <DropZone
+                  filesToPreview={previewBanner}
+                  maxFiles={1}
+                  parentCallback={handleCallbackBanner}
+                />
               </Grid>
               <Grid
                 item

@@ -96,7 +96,7 @@ const APP_TEXTS = {
   MESSAGE_CREATE_STORE: 'Felicidades, la tienda ha sido creada!',
   MESSAGE_UPDATE_STORE: 'Tienda actualizada!',
   MESSAGE_DELETE_STORE: 'La tienda ha sido eliminada!',
-  CONFIRM_DELETE_STORE: 'Desea Eliminar la tienda y todo su contenido?',
+  CONFIRM_DELETE_STORE: 'Estas por eliminar la tienda y todo su contenido. Después de esto, no se puede recuperar. Si necesitas ayuda contáctanos',
   LOGO_STORE: 'Logo de tu marca',
   BANNER_STORE: 'Banner o imágen superior',
   NAME_STORE: 'Nombre de la Marca',

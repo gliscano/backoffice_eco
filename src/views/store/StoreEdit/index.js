@@ -11,10 +11,8 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.dark,
     minHeight: '100%',
     paddingBottom: theme.spacing(3),
-    paddingTop: theme.spacing(3)
-  },
-  toolbar: {
-    margin: theme.spacing(1)
+    paddingTop: theme.spacing(2),
+    paddingLeft: theme.spacing(2)
   },
 }));
 

@@ -38,6 +38,13 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: '56.25%', // 16:9
     cursor: 'pointer',
   },
+  social: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  socialLabel: {
+    paddingLeft: '5px'
+  },
   actions: {
     justifyContent: 'space-between',
   },
@@ -57,6 +64,8 @@ const CardStore = ({
   handleDelete
 }) => {
   const classes = useStyles();
+  const urlLogo = storeData.logoUrl || storeData.urlImageLogo;
+  const urlBanner = storeData.bannerUrl || '/static/images/store/yourBanner.jpg';
 
   return (
     <Card
@@ -68,7 +77,7 @@ const CardStore = ({
         className={classes.cardHeader}
         avatar={(
           <Avatar
-            src={storeData.urlImageLogo}
+            src={urlLogo}
             className={classes.avatar}
           >
             {String(item.name).slice(0, 1).toUpperCase()}
@@ -77,7 +86,7 @@ const CardStore = ({
       />
       <CardMedia
         className={classes.media}
-        image="/static/images/store/yourBanner.jpg"
+        image={urlBanner}
         title={storeData.title}
         id={item.store_id}
         onClick={(e) => handleEdit(e, true)}
@@ -91,29 +100,31 @@ const CardStore = ({
             item
             md={6}
             xs={12}
-            justifyContent="center"
+            className={classes.social}
           >
             <WhatsAppIcon />
-            {' '}
-            {item.phone}
+            <span className={classes.socialLabel}>
+              {item.phone}
+            </span>
           </Grid>
           {item.instagram && (
             <Grid
               item
               md={6}
               xs={12}
-              justifyContent="center"
+              className={classes.social}
             >
               <InstagramIcon />
-              {' '}
-              <Link
-                href={`https://www.instagram.com/${item.instagram}/`}
-                color="inherit"
-                target="_blank"
-                rel="noopener"
-              >
-                {item.instagram}
-              </Link>
+              <span className={classes.socialLabel}>
+                <Link
+                  href={`https://www.instagram.com/${item.instagram}/`}
+                  color="inherit"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  {item.instagram}
+                </Link>
+              </span>
             </Grid>
           )}
         </Grid>
