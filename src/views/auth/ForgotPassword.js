@@ -1,7 +1,8 @@
 // React
 import React, { useState } from 'react';
-// Redux and Router
+// Redux, Router and Hooks
 import { useHistory } from 'react-router-dom';
+import useAlertBar from 'src/hooks/useAlertBar';
 // tools
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -20,8 +21,6 @@ import Page from 'src/components/Page';
 import APP_TEXTS from 'src/language/lang_ES';
 // Services Api
 import LoginServiceApi from 'src/services/LoginServiceApi';
-import { useDispatch, useSelector } from 'react-redux';
-import { HIDE_ALERT, SET_ALERT_DATA } from 'src/store/action_types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,8 +57,7 @@ const ResetPassword = () => {
   // hooks
   const classes = useStyles();
   const history = useHistory();
-  const appData = useSelector((state) => state.app);
-  const dispatch = useDispatch();
+  const { showAlert } = useAlertBar();
   // communication instances
   const loginServiceApi = new LoginServiceApi();
 
@@ -68,32 +66,8 @@ const ResetPassword = () => {
     // history.push(path);
   };
 
-  const closeAlert = () => {
-    dispatch({
-      type: HIDE_ALERT,
-      payload: ''
-    });
-  };
-
-  const handleAlertBar = (status, message) => {
-    const { alert, ...rest } = appData;
-    const alertData = {
-      ...alert,
-      open: true,
-      message,
-      severity: (status) ? 'success' : 'error',
-      callback: closeAlert,
-    };
-
-    const data = {
-      ...rest,
-      alert: alertData
-    };
-
-    dispatch({
-      type: SET_ALERT_DATA,
-      payload: data
-    });
+  const handleAlertBar = (typeAlert, message) => {
+    showAlert({ typeAlert, message });
   };
 
   const goBack = () => {
@@ -101,17 +75,17 @@ const ResetPassword = () => {
   };
 
   function processResult(response) {
-    let status = true;
+    let typeAlert = 'success';
     let message = APP_TEXTS.RESET_PASSWORD_MESSAGE;
 
     console.log('response', response);
 
     if (typeof response.data === 'string') {
-      status = false;
+      typeAlert = 'error';
       message = (response.data === 'invalid email') ? APP_TEXTS.INVALID_EMAIL : APP_TEXTS.ERR_UNKNOWN;
     }
 
-    handleAlertBar(status, message);
+    handleAlertBar(typeAlert, message);
     goTo();
   }
 

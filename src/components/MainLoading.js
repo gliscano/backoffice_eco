@@ -11,18 +11,20 @@ import Logo from 'src/components/Logo';
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
-    height: '100%',
+    height: 'calc(100% - 128px)',
+    position: 'relative',
     display: 'flex',
+    zIndex: 9999,
   },
   progressContainer: {
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     margin: 'auto',
   },
   small: {
     position: 'absolute',
-    marginTop: theme.spacing(1),
-    marginLeft: theme.spacing(1),
+    margin: theme.spacing(1),
   },
   progress: {
     zIndex: 1,

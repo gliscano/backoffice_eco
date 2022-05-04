@@ -256,14 +256,7 @@ const LoginView = () => {
       title="Login"
     >
       {showPreloader && (
-        <Box
-          display="flex"
-          flexDirection="column"
-          height="100%"
-          justifyContent="center"
-        >
-          <MainLoading />
-        </Box>
+        <MainLoading />
       )}
       {!showPreloader && (
         <Box
