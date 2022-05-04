@@ -10,7 +10,6 @@ import AddProduct from 'src/views/product/AddProduct';
 import Address from 'src/views/address';
 import ListCategory from 'src/views/category/ListCategory';
 import AddCategory from 'src/views/category/AddCategory';
-import CustomerListView from 'src/views/customer/CustomerListView';
 import DashboardView from 'src/views/reports/DashboardView';
 import EditProduct from 'src/views/product/EditProduct';
 import LastOrders from 'src/views/order/';
@@ -49,11 +48,6 @@ const RoutesDashboard = ({ path }) => (
       exact
       path={path.concat(APP_CONFIG.ROUTE_CREATE_CATEGORY)}
       component={AddCategory}
-    />
-    <Route
-      exact
-      path={`${APP_CONFIG.ROUTE_CUSTOMERS}`}
-      component={CustomerListView}
     />
     <Route
       exact
