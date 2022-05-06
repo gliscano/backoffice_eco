@@ -78,8 +78,6 @@ const ResetPassword = () => {
     let typeAlert = 'success';
     let message = APP_TEXTS.RESET_PASSWORD_MESSAGE;
 
-    console.log('response', response);
-
     if (typeof response.data === 'string') {
       typeAlert = 'error';
       message = (response.data === 'invalid email') ? APP_TEXTS.INVALID_EMAIL : APP_TEXTS.ERR_UNKNOWN;

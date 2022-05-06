@@ -191,7 +191,6 @@ const StoreCreate = ({ className, ...rest }) => {
             resp.bannerUrl = url;
           }
         });
-        console.log('resp', resp);
 
         await updateStore(resp);
       }
@@ -252,7 +251,6 @@ const StoreCreate = ({ className, ...rest }) => {
     Object.entries(values).forEach(([name, value]) => {
       let text = helperText[name] || '';
       if (value === '' && text !== '') {
-        console.log(name, value, text);
         confirmedError = true;
       } else {
         text = '';

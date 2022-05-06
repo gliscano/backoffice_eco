@@ -164,7 +164,6 @@ const ListCategory = () => {
   };
 
   const callbackDelete = (item) => {
-    console.log(item);
     if (!item) { return; }
 
     const params = {

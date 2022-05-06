@@ -181,13 +181,12 @@ const AddProduct = () => {
     categoryServiceApi.getCategories(userData.token)
       .then((response) => {
         if (response && response.data) {
-          setCategory(response.data);
+          const sortedData = response.data.sort((a, b) => (a.name > b.name && 1) || -1);
+          setCategory(sortedData);
           if (response.data.length === 1) {
             const data = response.data[0];
             const { name } = data;
             setCategorySelected(name);
-            // const subcateg = data.subcategories;
-            // setSubcategories(subcateg);
           }
         } else {
           setCategory([]);
@@ -308,30 +307,46 @@ const AddProduct = () => {
                   >
                     {category.map((item) => (
                       <>
-                        <Accordion>
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls="panel1a-content"
-                            id="panel1"
-                          >
-                            <Typography>{item.name}</Typography>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            {item.subcategories.map((itemSub) => (
-                              <MenuItem
-                                key={itemSub.category_id}
-                                className={classes.itemSubcategory}
-                                onClick={() => changeCategory(itemSub)}
+                        {(item.subcategories.length > 0)
+                          ? (
+                            <Accordion>
+                              <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1"
                               >
-                                <Checkbox
-                                  id={itemSub.category_id}
-                                  checked={selectedCategory.indexOf(itemSub.category_id) > -1}
-                                />
-                                <ListItemText primary={itemSub.name} />
-                              </MenuItem>
-                            ))}
-                          </AccordionDetails>
-                        </Accordion>
+                                <Typography>{item.name}</Typography>
+                              </AccordionSummary>
+                              <AccordionDetails>
+                                {item.subcategories.map((itemSub) => (
+                                  <MenuItem
+                                    key={itemSub.category_id}
+                                    className={classes.itemSubcategory}
+                                    onClick={() => changeCategory(itemSub)}
+                                  >
+                                    <Checkbox
+                                      id={itemSub.category_id}
+                                      checked={selectedCategory.indexOf(itemSub.category_id) > -1}
+                                    />
+                                    <ListItemText primary={itemSub.name} />
+                                  </MenuItem>
+                                ))}
+                              </AccordionDetails>
+                            </Accordion>
+                          )
+                          : (
+                            <MenuItem
+                              key={item.category_id}
+                              className={classes.itemSubcategory}
+                              onClick={() => changeCategory(item)}
+                            >
+                              <Checkbox
+                                id={item.category_id}
+                                checked={selectedCategory.indexOf(item.category_id) > -1}
+                              />
+                              <ListItemText primary={item.name} />
+                            </MenuItem>
+                          )}
                       </>
                     ))}
                   </Select>

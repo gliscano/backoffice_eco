@@ -219,7 +219,6 @@ const StoreEdit = ({ className, ...rest }) => {
 
     storeServiceApi.requestPost(dataStore, true)
       .then((response) => {
-        console.log(response);
         if (response && response.stores) {
           processResult(response);
         }

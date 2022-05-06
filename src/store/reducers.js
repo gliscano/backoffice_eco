@@ -59,7 +59,6 @@ const userReducer = (state = initialState, { type, payload }) => {
     case SET_ALERT_DATA: {
       const { userData, storeData } = state;
       const mergeData = { ...state.app, ...payload };
-      console.log('REDUCER APP ALERT', mergeData);
       return {
         app: mergeData,
         userData,
@@ -70,7 +69,6 @@ const userReducer = (state = initialState, { type, payload }) => {
       const { app, userData, storeData } = state;
       const clearAlertData = { ...app.alert, ...initialState.app.alert };
       app.alert = { ...clearAlertData };
-      console.log('REDUCER HIDE ALERT', app);
       return {
         app,
         userData,
