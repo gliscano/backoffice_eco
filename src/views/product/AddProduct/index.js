@@ -31,13 +31,13 @@ import APP_TEXTS from 'src/language/lang_ES';
 import APP_CONFIG from 'src/config/app.config';
 // Components
 import DropZone from 'src/components/dropZonePreview';
-import AlertBar from 'src/components/AlertBar';
 // services Api
 import CategoryServiceApi from 'src/services/CategoryServiceApi';
 import ProductServiceApi from 'src/services/ProductServiceApi';
 
 import storage from 'src/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import useAlertBar from 'src/hooks/useAlertBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -78,16 +78,16 @@ const AddProduct = () => {
     stock: '',
     title: '',
   });
-  const [alert, setAlert] = useState({
-    open: false,
-    message: '',
-    severity: 'success',
-    callback: null,
+  const [errors, setErrors] = useState({
+    title: '',
+    price: '',
+    category_id: '',
   });
   // hooks
   const classes = useStyles();
   const userData = useSelector((state) => state.userData);
   const storeData = useSelector((state) => state.storeData);
+  const { showAlert, hideAlert } = useAlertBar();
   const history = useHistory();
   // communication instance
   const categoryServiceApi = new CategoryServiceApi();
@@ -106,11 +106,48 @@ const AddProduct = () => {
     history.goBack();
   };
 
+  const handleError = (name, value) => {
+    setErrors((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
   const handleChange = (event) => {
     setValues({
       ...values,
       [event.target.name]: event.target.value
     });
+
+    // clear error
+    handleError(event.target.name, '');
+  };
+
+  const validateData = () => {
+    let confirmedError = false;
+
+    const helperText = {
+      title: APP_TEXTS.REQUIRED_TITLE_PRODUCT,
+      price: APP_TEXTS.REQUIRED_PRICE,
+    };
+
+    Object.entries(values).forEach(([name, value]) => {
+      let text = helperText[name] || '';
+      if (value === '' && text !== '') {
+        confirmedError = true;
+      } else {
+        text = '';
+      }
+      // set Error
+      handleError(name, text);
+    });
+
+    if (selectedCategory.length === 0) {
+      confirmedError = true;
+      handleError('category_id', APP_TEXTS.REQUIRED_CATEGORY_STORE);
+    }
+
+    return confirmedError;
   };
 
   const changeCategory = (data) => {
@@ -137,6 +174,9 @@ const AddProduct = () => {
       ...prevState,
       categories: newArrayPreview,
     }));
+
+    // clear error
+    handleError('category_id', '');
   };
 
   const uploadPhotos = (product) => {
@@ -157,23 +197,11 @@ const AddProduct = () => {
     setPhotos(metaPhotos);
   };
 
-  const closeAlert = () => {
-    setAlert({
-      ...alert,
-      open: false,
-      message: '',
-      callback: null,
-    });
-  };
-
   const handleAlertBar = (status) => {
-    setAlert({
-      ...alert,
-      open: true,
-      message: (status) ? APP_TEXTS.MESSAGE_CREATE_PRODUCT : APP_TEXTS.CREATE_PRODUCT_ERROR,
-      severity: (status) ? 'success' : 'error',
-      callback: closeAlert,
-    });
+    const message = (status) ? APP_TEXTS.MESSAGE_CREATE_PRODUCT : APP_TEXTS.CREATE_PRODUCT_ERROR;
+    const typeAlert = (status) ? 'success' : 'error';
+
+    showAlert({ message, typeAlert });
   };
 
   // Get list of products from Api
@@ -202,7 +230,7 @@ const AddProduct = () => {
     const param = {
       categoryId: categ,
       code: values.codeSKU || skuRandom,
-      description: values.description,
+      description: values.description || APP_TEXTS.WITHOUT_DESCRIPTION_PRODUCT,
       photos: urlPhotos,
       price: values.price,
       stock: values.stock || 1000000,
@@ -234,12 +262,15 @@ const AddProduct = () => {
     productServiceApi.createUpdateProduct(propsToUpdate)
       .then((response) => {
         if (response && response.products) {
-          const resultStatus = true;
-          handleAlertBar(resultStatus);
+          handleAlertBar(true);
 
           setTimeout(() => {
+            hideAlert();
             goTo(APP_CONFIG.ROUTE_PRODUCTS);
           }, 1000);
+        } else {
+          // Show error alert
+          handleAlertBar(false);
         }
       });
   };
@@ -249,16 +280,31 @@ const AddProduct = () => {
     const loadingPhotos = uploadPhotos(prod);
     if (loadingPhotos) {
       updateUrlImage(loadingPhotos, prod);
+    } else {
+      handleAlertBar(true);
+
+      setTimeout(() => {
+        hideAlert();
+        goTo(APP_CONFIG.ROUTE_PRODUCTS);
+      }, 1000);
     }
   };
 
   const addNewProduct = () => {
     const param = getDataToApi();
 
+    // validate data required
+    if (validateData() || !userData.user_id) {
+      return;
+    }
+
     productServiceApi.createUpdateProduct(param)
       .then((response) => {
         if (response && response.products) {
           processResult(response.products);
+        } else {
+          // Show error alert
+          handleAlertBar(false);
         }
       });
   };
@@ -304,6 +350,7 @@ const AddProduct = () => {
                     labelId={APP_TEXTS.CATEGORY_LABEL}
                     value={categoryPreview.categories}
                     renderValue={(selected) => selected.join(', ')}
+                    error={errors.category_id !== ''}
                   >
                     {category.map((item) => (
                       <>
@@ -376,8 +423,8 @@ const AddProduct = () => {
                   fullWidth
                   name="title"
                   label={APP_TEXTS.TITLE_LABEL}
-                  helperText={`${values.title.length}/60`}
-                  error={values.title.length > 60}
+                  error={errors.title !== '' || values.title.length > 60}
+                  helperText={`${values.title.length}/60` || errors.title}
                   onChange={handleChange}
                   required
                   value={values.title}
@@ -427,9 +474,10 @@ const AddProduct = () => {
                     name="price"
                     type="number"
                     required
+                    error={errors.price !== '' || values.price < 0}
+                    helperText={errors.price}
                     onChange={handleChange}
                     value={values.price}
-                    error={values.price < 0}
                     variant="outlined"
                   />
                 </Grid>
@@ -488,16 +536,6 @@ const AddProduct = () => {
             </Button>
           </Box>
         </Card>
-        {(alert && alert.open)
-        && (
-        <AlertBar
-          open={alert.open}
-          message={alert.message}
-          primaryButton={alert.button}
-          severity={alert.status}
-          parentCallback={alert.callback}
-        />
-        )}
       </Grid>
     </form>
   );
