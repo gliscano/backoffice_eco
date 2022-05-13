@@ -149,6 +149,7 @@ const APP_TEXTS = {
   NOTIFICATIONS_TITLE: 'Notificaciones',
   NOTIFICATIONS_SUBTITLE: 'Gestionar las notificaciones',
   CURRENCY_AND_LANGUAGE_TITLE: 'Moneda e Idioma',
+  MESSAGE_UPDATE_SETTINGS: 'La configuración fue actualizada correctamente',
 
   // API ERRORS
   ERR_UNKNOWN: 'Error desconocido. Por favor contacte a issues@nombreplataforma.com',

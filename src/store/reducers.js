@@ -2,6 +2,7 @@
 import APP_TEXTS from 'src/language/lang_ES';
 import {
   SET_ALERT_DATA,
+  SET_LANG_CURRENCY_DATA,
   HIDE_ALERT,
   SET_USER_DATA,
   CLEAR_USER_DATA,
@@ -18,7 +19,9 @@ const initialState = {
       button: APP_TEXTS.ACCEPT_BTN,
       severity: 'info',
       callback: null,
-    }
+    },
+    currencyId: '',
+    languageId: '',
   },
   userData: {
     email: '',
@@ -57,6 +60,15 @@ const initialState = {
 const userReducer = (state = initialState, { type, payload }) => {
   switch (type) {
     case SET_ALERT_DATA: {
+      const { userData, storeData } = state;
+      const mergeData = { ...state.app, ...payload };
+      return {
+        app: mergeData,
+        userData,
+        storeData,
+      };
+    }
+    case SET_LANG_CURRENCY_DATA: {
       const { userData, storeData } = state;
       const mergeData = { ...state.app, ...payload };
       return {

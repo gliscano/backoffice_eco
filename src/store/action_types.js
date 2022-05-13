@@ -1,6 +1,7 @@
 /* APP */
 export const SET_ALERT_DATA = 'SET_ALERT_DATA';
 export const HIDE_ALERT = 'HIDE_ALERT';
+export const SET_LANG_CURRENCY_DATA = 'SET_LANG_CURRENCY_DATA';
 /* USER */
 export const SET_USER_DATA = 'SET_USER_DATA';
 export const CLEAR_USER_DATA = 'CLEAR_USER_DATA';
@@ -11,6 +12,11 @@ export const CLEAR_STORE_DATA = 'CLEAR_STORE_DATA';
 
 export const setAlertData = (obj) => ({
   type: SET_ALERT_DATA,
+  payload: obj,
+});
+
+export const setLangCurrencyData = (obj) => ({
+  type: SET_LANG_CURRENCY_DATA,
   payload: obj,
 });
 

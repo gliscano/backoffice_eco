@@ -1,4 +1,4 @@
-const country = {
+const COUNTRY = {
   id: 'VE',
   name: 'Venezuela',
   locale: 'es_VE',
@@ -120,4 +120,4 @@ const country = {
   ],
 };
 
-export default country;
+export default COUNTRY;

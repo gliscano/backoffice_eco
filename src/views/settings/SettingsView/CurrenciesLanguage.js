@@ -1,7 +1,8 @@
 // React
-import React from 'react';
-import PropTypes from 'prop-types';
-import clsx from 'clsx';
+import React, { useState } from 'react';
+// Redux
+import { useDispatch, useSelector } from 'react-redux';
+import { SET_LANG_CURRENCY_DATA } from 'src/store/action_types';
 // Material UI and Icons
 import {
   Box,
@@ -19,7 +20,9 @@ import {
 // Language
 import APP_TEXTS from 'src/language/lang_ES';
 // Constants - Currencies
-import AvailableCurrencies from 'src/config/Currencies';
+import Currencies from 'src/config/Currencies';
+import Locales from 'src/config/locales';
+import useAlertBar from 'src/hooks/useAlertBar';
 
 const useStyles = makeStyles(({
   root: {},
@@ -29,15 +32,54 @@ const useStyles = makeStyles(({
   }
 }));
 
-const CurrenciesLanguage = ({ className, ...rest }) => {
+const CURRENCY_DEFAULT = Currencies.filter((element) => element.id === 'USD');
+const LOCALE_DEFAULT = Locales.filter((element) => element.id === 'es-ES');
+
+const CurrenciesLanguage = () => {
   const classes = useStyles();
-  // const [selectedCurrency, setCurrency] = useState('Dolar Americano');
-  // const [selectedLanguage, setLanguage] = useState('Español');
+  const [currencySelected, setCurrencySelected] = useState(CURRENCY_DEFAULT[0]);
+  const [languageSelected, setLanguageSelected] = useState(LOCALE_DEFAULT[0]);
+  // Hooks
+  const appData = useSelector((state) => state.app);
+  const dispatch = useDispatch();
+  const { showAlert } = useAlertBar();
+
+  const handleChangeCurrency = (data) => {
+    setCurrencySelected(data);
+  };
+
+  const handleChangeLang = (data) => {
+    setLanguageSelected(data);
+  };
+
+  const handleAlertBar = (typeAlert, message) => {
+    showAlert({ typeAlert, message });
+  };
+
+  const handleSaveChanges = () => {
+    const { alert, ...rest } = appData;
+    const data = {
+      ...rest,
+      currencyId: currencySelected.id,
+      languageId: languageSelected.id
+    };
+
+    console.log('SAVE DATA', data);
+
+    dispatch({
+      type: SET_LANG_CURRENCY_DATA,
+      payload: data
+    });
+
+    const typeAlert = 'success';
+    const message = APP_TEXTS.MESSAGE_UPDATE_SETTINGS;
+
+    handleAlertBar(typeAlert, message);
+  };
 
   return (
     <form
-      className={clsx(classes.root, className)}
-      {...rest}
+      className={classes.root}
     >
       <Card>
         <CardHeader
@@ -69,16 +111,16 @@ const CurrenciesLanguage = ({ className, ...rest }) => {
                 select
                 required
                 name="currency"
-                value="Dolar"
-                // onChange={setCurrency}
+                value={currencySelected.name}
                 variant="outlined"
                 size="small"
               >
-                {AvailableCurrencies.map((item) => (
+                {Currencies.map((item) => (
                   <MenuItem
-                    key={item.name}
-                    value={item}
+                    key={item.id}
+                    value={item.name}
                     disabled={!item.active}
+                    onClick={() => handleChangeCurrency(item)}
                   >
                     {item.name}
                   </MenuItem>
@@ -104,25 +146,20 @@ const CurrenciesLanguage = ({ className, ...rest }) => {
                 select
                 required
                 name="language"
-                value="Español"
-                defaultValue=""
-                // onChange={setLanguage}
+                value={languageSelected.name}
                 variant="outlined"
                 size="small"
               >
-                <MenuItem
-                  key="español"
-                  value="Español"
-                >
-                  Español
-                </MenuItem>
-                <MenuItem
-                  key="english"
-                  value="English"
-                  disabled="true"
-                >
-                  English
-                </MenuItem>
+                {Locales.map((item) => (
+                  <MenuItem
+                    key={item.id}
+                    value={item.name}
+                    disabled={!item.active}
+                    onClick={() => handleChangeLang(item)}
+                  >
+                    {item.name}
+                  </MenuItem>
+                ))}
               </TextField>
             </Grid>
           </Grid>
@@ -136,6 +173,7 @@ const CurrenciesLanguage = ({ className, ...rest }) => {
           <Button
             color="primary"
             variant="contained"
+            onClick={handleSaveChanges}
           >
             {APP_TEXTS.SAVE_CHANGES_BTN}
           </Button>
@@ -143,10 +181,6 @@ const CurrenciesLanguage = ({ className, ...rest }) => {
       </Card>
     </form>
   );
-};
-
-CurrenciesLanguage.propTypes = {
-  className: PropTypes.string
 };
 
 export default CurrenciesLanguage;
