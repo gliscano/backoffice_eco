@@ -99,7 +99,6 @@ class StoreServiceApi {
       .then((response) => response.json())
       .then((resp) => {
         const result = this.processResult(resp);
-        console.log(result);
         return result;
       })
       .catch((error) => {

@@ -136,8 +136,7 @@ const AddProduct = () => {
     });
   };
 
-  const processResult = (response) => {
-    console.log(response);
+  const processResult = () => {
     const resultStatus = true;
     handleAlertBar(resultStatus);
 

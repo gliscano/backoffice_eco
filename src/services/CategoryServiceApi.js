@@ -22,7 +22,6 @@ class CategoryServiceApi {
   processResult(resp) {
     if (resp) {
       this.dataServer = resp;
-      console.log(this.dataServer);
     }
 
     return resp;
