@@ -72,6 +72,7 @@ const ProductList = () => {
   const history = useHistory();
   const userData = useSelector((state) => state.userData);
   const storeData = useSelector((state) => state.storeData);
+  const appData = useSelector((state) => state.app);
   // communication instances
   const productServiceApi = new ProductServiceApi();
 
@@ -231,6 +232,7 @@ const ProductList = () => {
               >
                 <CardProduct
                   key={product.product_id}
+                  appData={appData}
                   className={classes.productCard}
                   product={product}
                   callbackEdit={callbackEdit}

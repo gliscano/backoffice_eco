@@ -69,12 +69,11 @@ const userReducer = (state = initialState, { type, payload }) => {
       };
     }
     case SET_LANG_CURRENCY_DATA: {
-      const { userData, storeData } = state;
-      const mergeData = { ...state.app, ...payload };
+      const { app, ...rest } = state;
+      const mergeData = Object.assign(app, payload);
       return {
         app: mergeData,
-        userData,
-        storeData,
+        ...rest,
       };
     }
     case HIDE_ALERT: {

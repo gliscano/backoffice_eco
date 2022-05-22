@@ -33,8 +33,6 @@ const useAlertBar = () => {
       alert: alertData
     };
 
-    console.log('ALERT DATA', data);
-
     dispatch({
       type: SET_ALERT_DATA,
       payload: data

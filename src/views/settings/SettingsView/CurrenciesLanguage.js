@@ -31,18 +31,25 @@ const useStyles = makeStyles(({
     flexDirection: 'column'
   }
 }));
+const getCurrencyDefault = (currencyId) => {
+  const id = currencyId || 'USD';
+  return Currencies.filter((element) => element.id === id)[0];
+};
 
-const CURRENCY_DEFAULT = Currencies.filter((element) => element.id === 'USD');
-const LOCALE_DEFAULT = Locales.filter((element) => element.id === 'es-ES');
+const getLanguageDefault = (languageId) => {
+  const lang = languageId || 'es-ES';
+  return Locales.filter((element) => element.id === lang)[0];
+};
 
 const CurrenciesLanguage = () => {
-  const classes = useStyles();
-  const [currencySelected, setCurrencySelected] = useState(CURRENCY_DEFAULT[0]);
-  const [languageSelected, setLanguageSelected] = useState(LOCALE_DEFAULT[0]);
   // Hooks
+  const classes = useStyles();
   const appData = useSelector((state) => state.app);
   const dispatch = useDispatch();
   const { showAlert } = useAlertBar();
+  // State
+  const [currencySelected, setCurrencySelected] = useState(getCurrencyDefault(appData.currencyId));
+  const [languageSelected, setLanguageSelected] = useState(getLanguageDefault(appData.languageId));
 
   const handleChangeCurrency = (data) => {
     setCurrencySelected(data);
@@ -57,14 +64,13 @@ const CurrenciesLanguage = () => {
   };
 
   const handleSaveChanges = () => {
-    const { alert, ...rest } = appData;
-    const data = {
-      ...rest,
-      currencyId: currencySelected.id,
-      languageId: languageSelected.id
-    };
+    const { currencyId, languageId, ...rest } = appData;
 
-    console.log('SAVE DATA', data);
+    const data = {
+      currencyId: currencySelected.id,
+      languageId: languageSelected.id,
+      ...rest,
+    };
 
     dispatch({
       type: SET_LANG_CURRENCY_DATA,
@@ -74,7 +80,10 @@ const CurrenciesLanguage = () => {
     const typeAlert = 'success';
     const message = APP_TEXTS.MESSAGE_UPDATE_SETTINGS;
 
-    handleAlertBar(typeAlert, message);
+    // Eliminar settimeout, debe ir al servicio a guardar los cambios y luego mostrar alertBar
+    setTimeout(() => {
+      handleAlertBar(typeAlert, message);
+    }, 2000);
   };
 
   return (

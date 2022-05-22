@@ -81,6 +81,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const CardProduct = ({
+  appData,
   className,
   product,
   callbackEdit,
@@ -114,7 +115,7 @@ const CardProduct = ({
     // return APP_UTILS.currencyFormat(number);
     const currencyFormat = new Intl.NumberFormat('id', {
       style: 'currency',
-      currency: 'USD'
+      currency: appData.currencyId || 'USD',
     }).format(value);
 
     return currencyFormat;
@@ -219,6 +220,7 @@ const CardProduct = ({
 };
 
 CardProduct.propTypes = {
+  appData: PropTypes.object.isRequired,
   className: PropTypes.string,
   product: PropTypes.object.isRequired,
   callbackEdit: PropTypes.func,
